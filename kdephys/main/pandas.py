@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 import tdt
 import xarray as xr
-import kd_analysis.signal.timefrequency as tfr
+import kdephys.signal.timefrequency as tfr
 from scipy.ndimage import gaussian_filter
-import kd_analysis.main.hypno as kh
+import kdephys.main.hypno as kh
 
 bd = {}
 bd['delta'] = slice(0.75, 4.1)

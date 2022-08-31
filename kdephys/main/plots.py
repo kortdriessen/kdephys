@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import kd_analysis.main.utils as kd
+import kdephys.main.utils as kd
 import neurodsp.plts.utils as dspu
 
 

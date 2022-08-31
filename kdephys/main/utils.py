@@ -4,9 +4,9 @@ import tdt
 import xarray as xr
 import hypnogram as hp
 import xarray as xr
-import kd_analysis.xrsig as xrsig
-import kd_analysis.xrsig.hypnogram_utils as xrhyp
-import kd_analysis.main.plots as kp
+import kdephys.xrsig as xrsig
+import kdephys.xrsig.hypnogram_utils as xrhyp
+import kdephys.main.plots as kp
 from scipy.stats import mode
 from scipy.ndimage.filters import gaussian_filter1d
 
