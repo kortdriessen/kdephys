@@ -3,11 +3,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-import hypnogram as hp
+import ecephys.hypnogram as hp
 
 from sklearn.decomposition import PCA
-from neurodsp.plts.utils import check_ax
-import sleep_score_for_me.utils.ssfm_utils as ssu
+from . import ssfm_utils as ssu
 
 bp_def = dict(
     delta=(0.5, 4),

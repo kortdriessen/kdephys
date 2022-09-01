@@ -1,0 +1,9 @@
+bands = {}
+bands["delta"] = slice(0.75, 4.1)
+bands["delta1"] = slice(0.75, 1.75)
+bands["delta2"] = slice(2.5, 3.5)
+bands["theta"] = slice(4.1, 8.1)
+bands["alpha"] = slice(8.1, 13.1)
+bands["sigma"] = slice(11.1, 16.1)
+bands["beta"] = slice(13.1, 30.1)
+bands["gamma"] = slice(30.1, 100.1)

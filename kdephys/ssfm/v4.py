@@ -2,8 +2,9 @@ import numpy as np
 import pandas as pd
 from . import ssfm_utils as ssu
 from scipy.signal import butter, lfilter
-import kdephys.main.utils as kd
-import hypnogram as hp
+import ecephys.hypnogram as hp
+import kdephys.xr.spectral as xsp
+import kdephys.xr.utils as xu
 
 bp_def_v4 = dict(
     sub_delta=(0, 1),
@@ -55,9 +56,9 @@ def get_muscle_energy(m, window_length=2, overlap=0, filt=True):
 
 
 def get_bp_features(eeg, bp_def, window_length=2, overlap=0, chan=2):
-    spg = kd.get_spextrogram(eeg, window_length=window_length, overlap=overlap)
+    spg = xsp.get_spextrogram(eeg, window_length=window_length, overlap=overlap)
     spg = spg.sel(channel=chan)
-    bp_set = kd.get_bp_set2(spg, bp_def)
+    bp_set = xsp.get_bp_set(spg, bp_def)
     return bp_set, spg
 
 

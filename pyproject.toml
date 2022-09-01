@@ -13,9 +13,8 @@ pandas = "^1.4.4"
 xarray = "^2022.6.0"
 matplotlib = "3.5.1"
 seaborn = "^0.11.2"
-neurodsp = "^2.1.0"
 tdt = "^0.5.3"
-hypnogram = {git = "https://github.com/CSC-UW/hypnogram.git"}
+ecephys = {path = "../ecephys/", develop = true}
 
 [tool.poetry.dev-dependencies]
 
