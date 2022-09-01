@@ -4,7 +4,7 @@ import tdt
 import xarray as xr
 import hypnogram as hp
 import xarray as xr
-import kdephys.xrsig as xrsig
+import kdephys.xrsig.dsp as xrsig
 import kdephys.xrsig.hypnogram_utils as xrhyp
 import kdephys.main.plots as kp
 from scipy.stats import mode
