@@ -10,6 +10,10 @@ import kdephys.main.plots as kp
 from scipy.stats import mode
 from scipy.ndimage.filters import gaussian_filter1d
 
+def ut(r='hello'):
+    print(r)
+
+
 ##Functions for loading TDT SEV-stores
 def sev_to_xarray(info, store):
     """Convert a single stream store to xarray format.
