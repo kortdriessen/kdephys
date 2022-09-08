@@ -130,7 +130,7 @@ def threshplot(data, time=None, percentiles=[50, 60, 65, 70], cut=None):
     return h_ax, lin_ax
 
 
-def plot_hypno_for_me(hypno, spg, emg_spg, bp_def, chan=2, smooth=True):
+def plot_hypno_for_me(hypno, spg, emg_spg, bp_def=bp_def, chan=2, smooth=True):
     fig, (m, d, g) = plt.subplots(ncols=1, nrows=3, figsize=(35, 15))
     try:
         emg_spg = emg_spg.sel(channel=1)

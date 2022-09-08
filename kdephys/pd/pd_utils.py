@@ -6,7 +6,7 @@ import tdt
 import kdephys.hypno as kh
 
 
-def load_dataset(path_root, cond_list, type):
+def load_saved_dataset(path_root, cond_list, type):
     ds = {}
     for cond in cond_list:
         path = path_root + cond + type + ".pkl"
@@ -14,36 +14,12 @@ def load_dataset(path_root, cond_list, type):
     return ds
 
 
-def load_hypnos(path_root, cond_list):
+def load_saved_hypnos(path_root, cond_list):
     h = {}
     for cond in cond_list:
         path = path_root + cond + "-hypno.pkl"
         h[cond] = pd.read_pickle(path)
     return h
-
-
-def get_tdt_spikes(path, t1, t2, chan, hyp, condition=""):
-    def create_spike_xarray(tdt_obj):
-        snip_times = tdt_obj.snips.eSpk.ts
-        snip_times = snip_times.flatten()
-        start_dt = pd.to_datetime(tdt_obj.info.start_date)
-        full_dti = pd.to_timedelta(snip_times, "s") + start_dt
-        phony_vals = np.ones(len(full_dti))
-        xr_snips = xr.DataArray(phony_vals, coords=[full_dti], dims=["datetime"])
-        return xr_snips
-
-    def spk_xr_to_pd(xr_obj, condition):
-        spkdf = pd.DataFrame()
-        spkdf["datetime"] = xr_obj.datetime.values
-        spkdf["spikes"] = xr_obj.values
-        spkdf["state"] = xr_obj.state.values
-        spkdf["condition"] = condition
-        return spkdf
-
-    tdt_obj = tdt.read_block(path, t1=t1, t2=t2, channel=chan, evtype=["snips"])
-    xr_obj = create_spike_xarray(tdt_obj)
-    xr_obj = kh.add_states(xr_obj, hyp)
-    return ecdata(spk_xr_to_pd(xr_obj, condition=condition))
 
 
 def tdt_to_pandas(path, t1=0, t2=0, channel=None, store=""):

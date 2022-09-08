@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import kdephys.utils.spectral as sp
 import ecephys.signal.timefrequency as tfr
+import xarray as xr
 
 bands = sp.bands
 

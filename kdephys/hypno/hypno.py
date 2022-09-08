@@ -82,8 +82,12 @@ def add_states(dat, hypnogram):
     --------
     xarray object with new coordinate `state` on dimension `datetime`.
     """
-    assert isinstance(hypnogram, DatetimeHypnogram)
-    assert "datetime" in dat.dims, "Data must contain datetime dimension."
+    try:
+        assert isinstance(hypnogram, DatetimeHypnogram)
+        assert "datetime" in dat.dims, "Data must contain datetime dimension."
+    except AssertionError as e:
+        print("assertion error in add_states: ", e)
+        return dat
     states = hypnogram.get_states(dat.datetime)
     return dat.assign_coords(state=("datetime", states))
 

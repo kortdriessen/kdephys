@@ -90,6 +90,14 @@ def filt_spg_by_state(spg, hyp, state):
     return spg
 
 
+def get_spg_from_dataset(ds, window_length=4, overlap=2):
+    spg_set = {}
+    kl = list(ds.keys())
+    for key in kl:
+        spg_set[key] = get_spextrogram(ds[key], window_length, overlap)
+    return spg_set
+
+
 """
 BANDPOWER
 --------------------
@@ -135,7 +143,7 @@ def get_relative_bp(spg1, spg2, f_range=(0.5, 4), median=False):
     return (bp1 / bp2) * 100
 
 
-def get_bp_set(spg, bands):
+def get_bp_set(spg, bands=bands):
     """
     Returns a set of bandpower timeseries for a given spectrogram
     -------------------------------------------------------------
@@ -153,6 +161,14 @@ def get_bp_set(spg, bands):
 
     bp_set = bp_ds.assign(**bp_vars)
 
+    return bp_set
+
+
+def get_bp_from_dataset(ds):
+    bp_set = {}
+    kl = list(ds.keys())
+    for key in kl:
+        bp_set[key] = get_bp_set(ds[key])
     return bp_set
 
 

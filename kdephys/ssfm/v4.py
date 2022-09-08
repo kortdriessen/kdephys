@@ -7,14 +7,14 @@ import kdephys.xr.spectral as xsp
 import kdephys.xr.utils as xu
 
 bp_def_v4 = dict(
-    sub_delta=(0, 1),
-    delta=(0.5, 5),
-    theta=(6, 9),
-    alpha=(10.5, 15),
-    sigma=(11, 16),
-    beta=(22, 30),
-    gamma=(35, 45),
-    wide=(0, 30),
+    sub_delta=slice(0, 1),
+    delta=slice(0.5, 5),
+    theta=slice(6, 9),
+    alpha=slice(10.5, 15),
+    sigma=slice(11, 16),
+    beta=slice(22, 30),
+    gamma=slice(35, 45),
+    wide=slice(0, 30),
 )
 
 
@@ -197,13 +197,12 @@ def ssfm_v4(
     chan,
     window_length=4,
     overlap=2,
-    bp_def=bp_def_v4,
     avg=True,
     nrows=4,
     user_hyp=None,
 ):
     bp, eeg_spg = get_bp_features(
-        eeg, bp_def, window_length=window_length, overlap=overlap, chan=chan
+        eeg, bp_def_v4, window_length=window_length, overlap=overlap, chan=chan
     )
     mus = get_muscle_energy(
         emg, window_length=window_length, overlap=overlap, filt=True
@@ -221,10 +220,10 @@ def ssfm_v4(
         ix_df = average_indices(ix_df, nrows=nrows)
 
     hypno = scoring_decision_tree(ix_df)
-    fig = ssu.plot_hypno_for_me_v4(hypno, eeg_spg, mus, bp_def, chan=chan)
+    # fig = ssu.plot_hypno_for_me_v4(hypno, eeg_spg, mus, chan=chan)
 
     if user_hyp is not None:
         fo = ssu.compare_hypnos_for_me(eeg_spg, chan, hypno, user_hyp)
         return hp.DatetimeHypnogram(hypno), fo
     else:
-        return hp.DatetimeHypnogram(hypno), fig
+        return hp.DatetimeHypnogram(hypno)
