@@ -33,7 +33,7 @@ class ecdata(pd.DataFrame):
         return self.reset_index()
 
     def ri(self):
-        return self.reset_index(drop=True)
+        return self.reset_index(drop=False)
 
     def bp_melt(self, bp_def=bands):
         """Melts a bandpower set to long-form.
@@ -55,9 +55,9 @@ class ecdata(pd.DataFrame):
         -----------
         bp_def: bandpower dictionary
         """
-        return self[self.state.isin(states)].reset_index(drop=True)
+        return self[self.state.isin(states)].reset_index(drop=False)
 
     def sm(self, col):
-        smoothed_data = gaussian_filter(self[col].values, 8)
+        smoothed_data = gaussian_filter(self[col].values, 24)
         self[col + "_smooth"] = smoothed_data
         return self

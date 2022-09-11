@@ -7,28 +7,6 @@ import kdephys.xr.spectral as xsp
 import kdephys.xr.utils as xu
 import xarray as xr
 
-bp_def_v4_slice = dict(
-    sub_delta=slice(0, 1),
-    delta=slice(0.5, 5),
-    theta=slice(6, 9),
-    alpha=slice(10.5, 15),
-    sigma=slice(11, 16),
-    beta=slice(22, 30),
-    gamma=slice(35, 45),
-    wide=slice(0, 30),
-)
-
-bp_def_v4 = dict(
-    sub_delta=(0, 1),
-    delta=(0.5, 5),
-    theta=(6, 9),
-    alpha=(10.5, 15),
-    sigma=(11, 16),
-    beta=(22, 30),
-    gamma=(35, 45),
-    wide=(0, 30),
-)
-
 
 def get_bp_set2(spg, bands, pandas=False):
     if type(spg) == xr.core.dataset.Dataset:
@@ -45,6 +23,18 @@ def get_bp_set2(spg, bands, pandas=False):
         return bp_set
     else:
         return bp_set
+
+
+bp_def_v4 = dict(
+    sub_delta=slice(0, 1),
+    delta=slice(0.5, 5),
+    theta=slice(6, 9),
+    alpha=slice(10.5, 15),
+    sigma=slice(11, 16),
+    beta=slice(22, 30),
+    gamma=slice(35, 45),
+    wide=slice(0, 30),
+)
 
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
@@ -84,10 +74,10 @@ def get_muscle_energy(m, window_length=2, overlap=0, filt=True):
     return energies
 
 
-def get_bp_features(eeg, bp_def, window_length=4, overlap=2, chan=2):
+def get_bp_features(eeg, bp_def, window_length=2, overlap=0, chan=2):
     spg = xsp.get_spextrogram(eeg, window_length=window_length, overlap=overlap)
     spg = spg.sel(channel=chan)
-    bp_set = get_bp_set2(spg, bp_def)
+    bp_set = xsp.get_bp_set(spg, bp_def)
     return bp_set, spg
 
 
@@ -226,12 +216,13 @@ def ssfm_v4(
     chan,
     window_length=4,
     overlap=2,
+    bp_def=bp_def_v4,
     avg=True,
     nrows=4,
     user_hyp=None,
 ):
     bp, eeg_spg = get_bp_features(
-        eeg, bp_def_v4, window_length=window_length, overlap=overlap, chan=chan
+        eeg, bp_def, window_length=window_length, overlap=overlap, chan=chan
     )
     mus = get_muscle_energy(
         emg, window_length=window_length, overlap=overlap, filt=True
@@ -249,10 +240,10 @@ def ssfm_v4(
         ix_df = average_indices(ix_df, nrows=nrows)
 
     hypno = scoring_decision_tree(ix_df)
-    # fig = ssu.plot_hypno_for_me_v4(hypno, eeg_spg, mus, chan=chan)
+    fig = ssu.plot_hypno_for_me_v4(hypno, eeg_spg, mus, bp_def, chan=chan)
 
-    # if user_hyp is not None:
-    # fo = ssu.compare_hypnos_for_me(eeg_spg, chan, hypno, user_hyp)
-    # return hp.DatetimeHypnogram(hypno), fo
-    # else:
-    return hp.DatetimeHypnogram(hypno)
+    if user_hyp is not None:
+        fo = ssu.compare_hypnos_for_me(eeg_spg, chan, hypno, user_hyp)
+        return hp.DatetimeHypnogram(hypno), fo
+    else:
+        return hp.DatetimeHypnogram(hypno), fig

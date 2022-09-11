@@ -67,6 +67,15 @@ def add_states_to_data(data, hypno):
     return data
 
 
+def add_states_to_dataset(dataset, hypnos):
+    for key in dataset.keys():
+        for cond in hypnos.keys():
+            if cond in key:
+                dataset[key] = add_states_to_data(dataset[key], hypnos[cond])
+                break
+    return dataset
+
+
 ## INCOMPLETE -----------------------------------------------------------------------------------------------------------
 
 
