@@ -57,7 +57,7 @@ class ecdata(pd.DataFrame):
         """
         return self[self.state.isin(states)].reset_index(drop=False)
 
-    def sm(self, col):
-        smoothed_data = gaussian_filter(self[col].values, 24)
+    def sm(self, col, sigma=12):
+        smoothed_data = gaussian_filter(self[col].values, sigma)
         self[col + "_smooth"] = smoothed_data
         return self
