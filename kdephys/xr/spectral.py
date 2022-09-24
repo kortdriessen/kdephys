@@ -117,7 +117,7 @@ def get_bandpower(spg, f_range):
     bandpower: xr.DataArray (datetime, [channel])
         Sum of the power in `f_range` at each point in time.
     """
-    bandpower = spg.sel(frequency=f_range).sum(dim="frequency")
+    bandpower = spg.sel(frequency=slice(*f_range)).sum(dim="frequency")
     bandpower.attrs["f_range"] = f_range
 
     return bandpower

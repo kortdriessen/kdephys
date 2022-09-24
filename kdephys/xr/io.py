@@ -21,7 +21,11 @@ def sev_to_xarray(info, store):
         Attrs: units, fs
         Name: The store name
     """
-    n_channels, n_samples = store.data.shape
+    try:
+        n_channels, n_samples = store.data.shape
+    except ValueError:
+        n_channels = 1
+        n_samples = store.data.shape[0]
 
     time = np.arange(0, n_samples) / store.fs + store.start_time
     timedelta = pd.to_timedelta(time, "s")

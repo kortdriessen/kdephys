@@ -61,10 +61,12 @@ def combine_data_lfp(data, conds, dtype="bp"):
 
 
 def add_states_to_data(data, hypno):
+    ix_names = list(data.index.names)
+    data = data.reset_index()
     dt = data.datetime.values
     states = hypno.get_states(dt)
     data["state"] = states
-    return data
+    return data.set_index(ix_names)
 
 
 def add_states_to_dataset(dataset, hypnos):
