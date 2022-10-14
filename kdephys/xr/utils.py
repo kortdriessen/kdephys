@@ -2,6 +2,7 @@ import tdt
 import xarray as xr
 from scipy.stats import mode
 from scipy.ndimage.filters import gaussian_filter1d
+import scipy.signal as signal
 import numpy as np
 import pandas as pd
 
@@ -53,3 +54,18 @@ def get_smoothed_ds(ds, smoothing_sigma=10, in_place=False):
     for da_name, da in ds.items():
         ds[da_name] = get_smoothed_da(da, smoothing_sigma, in_place)
     return ds
+
+
+def decimate(sig, q=5):
+    dat = signal.decimate(sig.values, q=q, ftype="fir", axis=0)
+    rs = xr.DataArray(
+        dat,
+        dims=sig.dims,
+        coords={
+            **sig["datetime"][::q].coords,
+            **sig[sig.dims[-1]].coords,
+        },
+        attrs=sig.attrs,
+    )
+    rs.attrs["fs"] = sig.fs / q
+    return rs

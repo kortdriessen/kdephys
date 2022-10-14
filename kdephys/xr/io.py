@@ -48,10 +48,9 @@ def sev_to_xarray(info, store):
     except:
         data = xr.DataArray(
             store.data.T * volts_to_microvolts,
-            dims=("time", "channel"),
+            dims=("time"),
             coords={
                 "time": time,
-                "channel": store.channel,
                 "timedelta": ("time", timedelta),
                 "datetime": ("time", datetime),
             },
@@ -145,3 +144,7 @@ def get_data(
     if sel_chan:
         data = data.sel(channel=sel_chan)
     return data
+
+
+def save_dataarray(da, path):
+    da.to_netcdf(path)

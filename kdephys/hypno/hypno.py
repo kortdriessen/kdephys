@@ -28,12 +28,15 @@ def _infer_bout_start(df, bout):
     return start_time
 
 
-def load_hypno_file(path, st):
+def load_hypno_file(path, st, dt=True):
     """Load a Visbrain formatted hypnogram."""
     df = pd.read_csv(path, sep="\t", names=["state", "end_time"], comment="*")
     df["start_time"] = df.apply(lambda row: _infer_bout_start(df, row), axis=1)
     df["duration"] = df.apply(lambda row: row.end_time - row.start_time, axis=1)
-    return to_datetime(df, st)
+    if dt:
+        df = to_datetime(df, st)
+    else:
+        return hp.Hypnogram(df)
 
 
 def to_datetime(df, start_datetime):
