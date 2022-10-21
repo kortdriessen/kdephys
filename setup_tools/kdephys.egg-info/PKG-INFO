@@ -1,0 +1,23 @@
+Metadata-Version: 2.1
+Name: kdephys
+Version: 0.0.1.dev0
+Summary: kdephys: ephys analysis functions
+Home-page: https://github.com/kortdriessen/kdephys
+Download-URL: 
+Author: Kort Driessen
+Author-email: driessen2@wisc.edu
+Maintainer: Kort Driessen
+Maintainer-email: driessen2@wisc.edu
+License: MIT
+Platform: OS Independent
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Scientific/Engineering
+Requires-Python: >=3.8, <3.11
+
+
+kdephys: ephys analysis functions
