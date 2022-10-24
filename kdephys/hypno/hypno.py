@@ -35,6 +35,7 @@ def load_hypno_file(path, st, dt=True):
     df["duration"] = df.apply(lambda row: row.end_time - row.start_time, axis=1)
     if dt:
         df = to_datetime(df, st)
+        return df
     else:
         return hp.Hypnogram(df)
 
@@ -95,6 +96,41 @@ def add_states(dat, hypnogram):
         return dat
     states = hypnogram.get_states(dat.datetime)
     return dat.assign_coords(state=("datetime", states))
+
+
+def get_states(hyp, times):
+    """Given a hypnogram and an array of times, label each time with its state.
+    Parameters:
+    -----------
+    times: (n_times,)
+        The times to label.
+    hyp: DatetimeHypnogram
+    Returns:
+    --------
+    states (n_times,)
+        The state label for each sample in `times`.
+    """
+    labels = pd.Series(["no_state"] * len(times))
+    for bout in hyp.itertuples():
+        times_in_bout = (times >= bout.start_time) & (times <= bout.end_time)
+        labels.values[times_in_bout] = bout.state
+
+    return labels
+
+
+def no_states_array(times):
+    """gives an array of no_state to match an array of times.
+    Parameters:
+    -----------
+    times: (n_times,)
+        The times to label.
+    hyp: DatetimeHypnogram
+    Returns:
+    --------
+    states (n_times,)
+        The state label for each sample in `times`.
+    """
+    return pd.Series(["no_state"] * len(times))
 
 
 def keep_states(dat, hypnogram, states):
