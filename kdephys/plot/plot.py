@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns #TODO remove seaborn dependency
+import seaborn as sns  # TODO remove seaborn dependency
 import kdephys.xr.utils as xu
 import kdephys.xr.spectral as xsp
 from ecephys.plot import check_ax
