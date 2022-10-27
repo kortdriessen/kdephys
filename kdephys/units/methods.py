@@ -16,7 +16,7 @@ def rec(self, rec):
 
 
 @pf.register_dataframe_method
-def stim(self):
+def stm(self):
     return self.loc[self.stim == 1]
 
 
@@ -28,3 +28,8 @@ def st(self, state):
 @pf.register_dataframe_method
 def ts(self, t1, t2):
     return self.loc[np.logical_and(self.datetime > t1, self.datetime < t2)]
+
+
+@pf.register_dataframe_method
+def sid(self, sort_id):
+    return self.loc[self.sort_id == sort_id]
