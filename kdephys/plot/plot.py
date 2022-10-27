@@ -4,8 +4,27 @@ import matplotlib.pyplot as plt
 import seaborn as sns  # TODO remove seaborn dependency
 import kdephys.xr.utils as xu
 import kdephys.xr.spectral as xsp
-from ecephys.plot import check_ax
 from kdephys.utils.plots import hypno_colors
+
+
+# This function is taken directly from neurodsp.plts.utils.
+# We cannot use the neurodsp package, because a critical IBL library shadows the name.
+def check_ax(ax, figsize=None):
+    """Check whether a figure axes object is defined, define if not.
+    Parameters
+    ----------
+    ax : matplotlib.Axes or None
+        Axes object to check if is defined.
+    Returns
+    -------
+    ax : matplotlib.Axes
+        Figure axes object to use.
+    """
+
+    if not ax:
+        _, ax = plt.subplots(figsize=figsize)
+
+    return ax
 
 
 def quick_lineplot(data):

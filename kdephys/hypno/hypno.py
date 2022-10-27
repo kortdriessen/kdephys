@@ -1,8 +1,8 @@
 import pandas as pd
 import yaml
 from pathlib import Path
-import ecephys.hypnogram as hp
-from ecephys.hypnogram import DatetimeHypnogram
+import kdephys.ecephys_hypnogram as hp
+from kdephys.hypno import DatetimeHypnogram
 
 
 def _infer_bout_start(df, bout):
@@ -46,32 +46,6 @@ def to_datetime(df, start_datetime):
     df["end_time"] = start_datetime + pd.to_timedelta(df["end_time"], "s")
     df["duration"] = pd.to_timedelta(df["duration"], "s")
     return hp.DatetimeHypnogram(df)
-
-
-def load_hypnograms(
-    subject,
-    experiment,
-    condition,
-    scoring_start_time,
-    hypnograms_yaml_file="/Volumes/paxilline/Data/paxilline_project_materials/pax-hypno-paths.yaml",
-):
-
-    with open(hypnograms_yaml_file) as fp:
-        yaml_data = yaml.safe_load(fp)
-
-    root = Path(yaml_data[subject]["hypno-root"])
-    hypnogram_fnames = yaml_data[subject][experiment][condition]
-    hypnogram_paths = [root / (fname + ".txt") for fname in hypnogram_fnames]
-
-    hypnogram_start_times = pd.date_range(
-        start=scoring_start_time, periods=len(hypnogram_paths), freq="7200S"
-    )
-    hypnograms = [
-        hp.load_visbrain_hypnogram(path).as_datetime(start_time)
-        for path, start_time in zip(hypnogram_paths, hypnogram_start_times)
-    ]
-
-    return pd.concat(hypnograms).reset_index(drop=True)
 
 
 def add_states(dat, hypnogram):
