@@ -19,8 +19,6 @@ setup(
         "matplotlib",
         "seaborn",
         "pandas_flavor",
-        "functools",
-        "multiprocessing",
     ],
     zip_safe=False,
 )
