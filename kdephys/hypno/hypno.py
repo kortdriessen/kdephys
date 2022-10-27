@@ -1,8 +1,6 @@
 import pandas as pd
 import yaml
 from pathlib import Path
-import kdephys.ecephys_hypnogram as hp
-from kdephys.hypno import DatetimeHypnogram
 
 
 def _infer_bout_start(df, bout):
@@ -37,7 +35,7 @@ def load_hypno_file(path, st, dt=True):
         df = to_datetime(df, st)
         return df
     else:
-        return hp.Hypnogram(df)
+        return Hypnogram(df)
 
 
 def to_datetime(df, start_datetime):
@@ -45,7 +43,7 @@ def to_datetime(df, start_datetime):
     df["start_time"] = start_datetime + pd.to_timedelta(df["start_time"], "s")
     df["end_time"] = start_datetime + pd.to_timedelta(df["end_time"], "s")
     df["duration"] = pd.to_timedelta(df["duration"], "s")
-    return hp.DatetimeHypnogram(df)
+    return DatetimeHypnogram(df)
 
 
 def add_states(dat, hypnogram):

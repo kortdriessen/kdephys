@@ -19,6 +19,7 @@ setup(
         "matplotlib",
         "seaborn",
         "pandas_flavor",
+        "spikeinterface",
     ],
     zip_safe=False,
 )

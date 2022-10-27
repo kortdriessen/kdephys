@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import kdephys.plot.plot as kp
-import ecephys as ec
 import kdephys.hypno as hp
 import kdephys.utils.spectral as sp
 from scipy.signal import spectrogram
