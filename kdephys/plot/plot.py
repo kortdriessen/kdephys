@@ -37,7 +37,7 @@ def shade_hypno_for_me(hypnogram, ax=None, xlim=None):
         ax.axvspan(
             bout.start_time,
             bout.end_time,
-            alpha=0.45,
+            alpha=0.3,
             color=hypno_colors[bout.state],
             zorder=1000,
             ec="none",
