@@ -1,7 +1,7 @@
 import pandas as pd
 import yaml
 from pathlib import Path
-
+from kdephys.hypno.ecephys_hypnogram import Hypnogram, DatetimeHypnogram
 
 def _infer_bout_start(df, bout):
     """Infer a bout's start time from the previous bout's end time.

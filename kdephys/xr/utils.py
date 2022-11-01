@@ -1,7 +1,7 @@
 import tdt
 import xarray as xr
 from scipy.stats import mode
-from scipy.ndimage.filters import gaussian_filter1d
+from scipy.ndimage import gaussian_filter1d
 import scipy.signal as signal
 import numpy as np
 import pandas as pd
@@ -69,3 +69,21 @@ def decimate(sig, q=5):
     )
     rs.attrs["fs"] = sig.fs / q
     return rs
+
+def rel_by_store(ds, exp, rel_rec='-bl', state='NREM'):
+    """split a dataset by its stores, then get each store relative to another recording (exp+rel_rec), filtered by state.
+    Args:
+        ds (xr.dataset, xr.DataArray): dataset
+        exp (str): experiment name
+        rel_rec (str, optional): recording to get mean value from (exp+rel_rec). Defaults to '-bl'.
+        state (str, optional): state to use in calculating the baseline average. Defaults to 'NREM'.
+        
+    """
+    ds_stores = {}
+    for store in ds.prbs():
+        ds_stores[store] = ds.prb(store)
+    ds_rel = {}
+    for store in ds_stores.keys():
+        avg_vals = ds_stores[store].rec(exp+rel_rec).st(state).mean('datetime')
+        ds_rel[store] = ds.prb(store) / avg_vals
+    return xr.concat(ds_rel.values(), 'store')

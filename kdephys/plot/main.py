@@ -56,7 +56,7 @@ def shade_hypno_for_me(hypnogram, ax=None, xlim=None):
         ax.axvspan(
             bout.start_time,
             bout.end_time,
-            alpha=0.3,
+            alpha=0.25,
             color=hypno_colors[bout.state],
             zorder=1000,
             ec="none",
@@ -65,6 +65,53 @@ def shade_hypno_for_me(hypnogram, ax=None, xlim=None):
     ax.set_xlim(xlim)
     return ax
 
+def add_light_schedule(times, ax=None, xlim=None):
+    """add a bar to indicate light/dark periods at the top of an axes.
+
+    Parameters
+    ----------
+    times: list
+        border times, should start with first lights on.
+    ax: matplotlib.Axes, optional
+        An axes upon which to plot.
+    """
+    xlim = ax.get_xlim() if (ax and not xlim) else xlim
+
+    ax = check_ax(ax)
+    for i, time in enumerate(times):
+        if i == len(times)-1:
+            break
+        elif i % 2 == 0:
+            ax.axvspan(time, times[i+1], ymin=0.98, ymax=1, color='gold')
+        else:
+            ax.axvspan(time, times[i+1], ymin=0.98, ymax=1, color='darkblue')
+
+    ax.set_xlim(xlim)
+    return ax
+
+def mark_stim(start, end, ax=None, xlim=None, color='red'):
+    """add a markings to an axis to indicate the start end end of a stimulus
+
+    Parameters
+    ----------
+    hypnogram: pandas.DataFrame
+        Hypnogram with with state, start_time, end_time columns.
+    ax: matplotlib.Axes, optional
+        An axes upon which to plot.
+    """
+    xlim = ax.get_xlim() if (ax and not xlim) else xlim
+
+    ax = check_ax(ax)
+    ax.axvline(start, color=color, linestyle='--', linewidth=2.2)
+    ax.axvline(end, color=color, linestyle='--', linewidth=2.2)
+
+    ax.set_xlim(xlim)
+    return ax
+
+def mark_single_stim(df, ax=None, xlim=None, color='red'):
+    start = df.stm().datetime.min() if 'datetime' in df else df.stm().index.min()
+    end = df.stm().datetime.max() if 'datetime' in df else df.stm().index.max()
+    return mark_stim(start, end, ax, xlim, color)
 
 def plot_shaded_bp(bp_set, chan, band, hyp, ax):
 

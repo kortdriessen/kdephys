@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
-import kdephys.plot.plot as kp
+import kdephys.plot.main as kp
 import kdephys.hypno as hp
 import kdephys.utils.spectral as sp
 from scipy.signal import spectrogram
@@ -277,7 +277,7 @@ def get_spextrogram(
     # time range
     kwargs["t_range"] = t_range
 
-    freqs, spg_time, spg = ec.signal.timefrequency.parallel_spectrogram_welch(
+    freqs, spg_time, spg = parallel_spectrogram_welch(
         sig.transpose("time", "channel").values, sig.fs, **kwargs
     )
 

@@ -1,2 +1,4 @@
-from .hypno import *
-from .ecephys_hypnogram import *
+from . import(
+    hypno, 
+    ecephys_hypnogram,
+)
