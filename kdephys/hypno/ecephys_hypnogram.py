@@ -483,7 +483,11 @@ class DatetimeHypnogram(Hypnogram):
                 "start_time", ignore_index=True
             )
         )
-
+    # ----------------------------------------------- KD-defined Methods of DatetimeHypnogram begin here -----------------------------------------------
+    def states_by_duration(self, states, duration=None):
+        self = self.keep_states(states)
+        return self.keep_longer(duration) if duration else self
+        
     @classmethod
     def from_htsv(cls, file):
         """Load a hypnogram whose entries are valid datetime strings."""
