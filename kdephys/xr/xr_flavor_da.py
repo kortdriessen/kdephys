@@ -9,16 +9,21 @@ def prb(self, store):
     """
     return dataset where store dimension (or coordinate) is prb
     """
-    if store in list(self.dims):
+    if 'store' in list(self.dims):
         return self.sel(store=store)
-    elif store in list(self.coords):
+    elif 'store' in list(self.coords):
         return self.where(self.store==store, drop=True)
     else:
         print(f'there no dimension or coordinate named store in this dataset') 
 
 @pf.register_xarray_dataarray_method
 def ts(self, t1, t2):
-    return self.sel(datetime=slice(t1, t2))
+    if 'datetime' in list(self.dims):
+        return self.sel(datetime=slice(t1,t2))
+    elif 'time' in list(self.dims):
+        return self.sel(time=slice(t1,t2))
+    else: 
+        print(f'there no dimension named time or datetime in this dataarray')
 
 @pf.register_xarray_dataarray_method
 def rec(self, rec):

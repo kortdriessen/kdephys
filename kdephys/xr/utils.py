@@ -80,10 +80,18 @@ def rel_by_store(ds, exp, rel_rec='-bl', state='NREM'):
         
     """
     ds_stores = {}
-    for store in ds.prbs():
-        ds_stores[store] = ds.prb(store)
-    ds_rel = {}
-    for store in ds_stores.keys():
-        avg_vals = ds_stores[store].rec(exp+rel_rec).st(state).mean('datetime')
-        ds_rel[store] = ds.prb(store) / avg_vals
-    return xr.concat(ds_rel.values(), 'store')
+    if len(ds.prbs()) == 1:
+        avgs = ds.rec(exp+rel_rec).st(state).mean('datetime')
+        rel_ds = ds/avgs
+        return rel_ds
+    elif len(ds.prbs()) > 1:
+        for store in ds.prbs():
+            ds_stores[store] = ds.prb(store)
+        ds_rel = {}
+        for store in ds_stores.keys():
+            avg_vals = ds_stores[store].rec(exp+rel_rec).st(state).mean('datetime')
+            ds_rel[store] = ds.prb(store) / avg_vals
+        return xr.concat(ds_rel.values(), 'store')
+    else:
+        print('no stores found')
+        return None
