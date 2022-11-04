@@ -483,11 +483,6 @@ class DatetimeHypnogram(Hypnogram):
                 "start_time", ignore_index=True
             )
         )
-    # ----------------------------------------------- KD-defined Methods of DatetimeHypnogram begin here -----------------------------------------------
-    def states_by_duration(self, states, duration=None):
-        self = self.keep_states(states)
-        return self.keep_longer(duration) if duration else self
-        
     @classmethod
     def from_htsv(cls, file):
         """Load a hypnogram whose entries are valid datetime strings."""
@@ -501,6 +496,18 @@ class DatetimeHypnogram(Hypnogram):
         df["end_time"] = pd.to_datetime(df["end_time"])
         df["duration"] = pd.to_timedelta(df["duration"])
         return cls(df)
+    # ----------------------------------------------- KD-defined Methods of DatetimeHypnogram begin here -----------------------------------------------
+    def states_by_duration(self, states, duration=None):
+        self = self.keep_states(states)
+        return self.keep_longer(duration) if duration else self
+    
+    def to_seconds(self):
+        new = self.copy()
+        new['start_time'] = (self.start_time - self.start_time.values[0]) / np.timedelta64(1, 's')
+        new['end_time'] = (self.end_time - self.start_time.values[0]) / np.timedelta64(1, 's')
+        return new
+        
+    
 
 
 #####
