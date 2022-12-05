@@ -39,6 +39,13 @@ def st(self, state):
         print('state must be a string or list of strings')
 
 @pf.register_xarray_dataarray_method
+def st_ex(self, state):
+    if type(state) == str:
+        return self.where(self.state != state, drop=True)
+    else:
+        print('state must be a string')
+
+@pf.register_xarray_dataarray_method
 def prn_dt(self):
     print(f'start -- {self.datetime.values.min()}')
     print(f'end -- {self.datetime.values.max()}')
