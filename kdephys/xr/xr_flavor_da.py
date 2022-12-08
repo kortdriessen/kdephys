@@ -17,13 +17,20 @@ def prb(self, store):
         print(f'there no dimension or coordinate named store in this dataset') 
 
 @pf.register_xarray_dataarray_method
+
 def ts(self, t1, t2):
-    if 'datetime' in list(self.dims):
+    if type(t1) == int:
+        if 'time' in list(self.dims):
+            return self.sel(time=slice(t1,t2))
+        elif 'datetime' in list(self.dims):
+            t = self.swap_dims({'datetime':'time'})
+            return t.sel(time=slice(t1,t2)).swap_dims({'time':'datetime'})
+        else:
+            print(f'there is no dimension named time or datetime in this dataarray')
+    elif type(t1) in [str, pd.Timestamp, np.datetime64]:
         return self.sel(datetime=slice(t1,t2))
-    elif 'time' in list(self.dims):
-        return self.sel(time=slice(t1,t2))
-    else: 
-        print(f'there no dimension named time or datetime in this dataarray')
+    else:
+        print(f't1 must be an int, string, pd.Timestamp, or np.datetime64')
 
 @pf.register_xarray_dataarray_method
 def rec(self, rec):
