@@ -27,6 +27,14 @@ def ts(self, t1, t2):
             return t.sel(time=slice(t1,t2)).swap_dims({'time':'datetime'})
         else:
             print(f'there is no dimension named time or datetime in this dataarray')
+    if type(t1) == float:
+        if 'time' in list(self.dims):
+            return self.sel(time=slice(t1,t2))
+        elif 'datetime' in list(self.dims):
+            t = self.swap_dims({'datetime':'time'})
+            return t.sel(time=slice(t1,t2)).swap_dims({'time':'datetime'})
+        else:
+            print(f'there is no dimension named time or datetime in this dataarray')
     elif type(t1) in [str, pd.Timestamp, np.datetime64]:
         return self.sel(datetime=slice(t1,t2))
     else:
