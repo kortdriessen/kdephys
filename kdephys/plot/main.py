@@ -191,6 +191,7 @@ def plot_bp_and_spectro(spg, chan, hyp, bp_def, band, fig_size=(35, 10)):
     return fig
 
 
+
 def compare_psd(
     psd1,
     psd2,
@@ -302,3 +303,10 @@ def plot_muscle(
     fig.suptitle(title)
     fig.tight_layout(pad=1.5)
     return fig, axes
+
+def quick_bp_channel_plot(bp, band='delta'):
+    for store in bp.store.values:
+        for chan in bp.channel.values:
+            f, ax = plt.subplots()
+            bp[band].sel(store=store, channel=chan).plot(ax=ax)
+    return

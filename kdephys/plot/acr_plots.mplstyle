@@ -51,7 +51,7 @@ figure.dpi: 50                 # figure dots per inch
 
 # Setting font sizes and spacing
 axes.labelsize: 18              # font size of the x and y labels
-xtick.labelsize: 14             # font size of the x tick labels      
+xtick.labelsize: 20             # font size of the x tick labels      
 ytick.labelsize: 14             # font size of the y tick labels
 font.size: 18                   # default font size for text, given in points.
 xtick.major.pad: 8              # distance to major tick label in points  
