@@ -1,5 +1,5 @@
 path.simplify: True
-path.simplify_threshold: 0.99
+path.simplify_threshold: 0.9
 
 # Legend Properties
 legend.loc: lower right
