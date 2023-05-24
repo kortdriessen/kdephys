@@ -4,4 +4,5 @@ from . import (
     utils,
     xr,
     units,
+    unit_flavor,
 )
