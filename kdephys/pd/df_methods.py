@@ -23,6 +23,10 @@ def prb(self, probe='NNXr'):
     return self.loc[self.probe == probe]
 
 @pf.register_dataframe_method
+def pclus(self, probe='NNXr', cluster=0):
+    return self.loc[np.logical_and(self.probe == probe, self.cluster_id == cluster)]
+
+@pf.register_dataframe_method
 def st(self, state):
     return self.loc[self.state == state]
 
