@@ -12,14 +12,13 @@ figure.facecolor: FFFFFF
 figure.titlesize:   23     # size of the figure title (``Figure.suptitle()``)
 figure.titleweight: bold    # weight of the figure title
 
-
 # Main Axes Properties
 axes.facecolor: FFFFFF
 
 # Axes Title styling
 axes.titlelocation: left        # alignment of the title: {left, right, center}
 axes.titlepad: 6               # pad between axes and title in points
-axes.titlesize: 20              # font size of the axes title
+axes.titlesize: 35              # font size of the axes title
 axes.titleweight: normal          # font weight of title
 
 # Grid Properties
