@@ -13,6 +13,8 @@ bands = sp.bands
 Functions taken directly from ecephys.signal.timefrequency to remove dependency on ecephys package
 ------------------
 """
+
+
 # This function is taken directly from neurodsp.spectral.utils.
 # We cannot use the neurodsp package, because a critical IBL library shadows the name.
 def all_arrays_equal(iterator):
@@ -116,7 +118,6 @@ def check_spg_settings(fs, window, nperseg, noverlap):
 
     # Set the nperseg, if not provided
     if nperseg is None:
-
         # If the window is a string or tuple, defaults to 1 second of data
         if isinstance(window, (str, tuple)):
             nperseg = int(fs)
@@ -277,26 +278,43 @@ def get_spextrogram(
     # time range
     kwargs["t_range"] = t_range
 
-    freqs, spg_time, spg = parallel_spectrogram_welch(
-        sig.transpose("time", "channel").values, sig.fs, **kwargs
-    )
+    if "channel" in sig.dims:
+        freqs, spg_time, spg = parallel_spectrogram_welch(
+            sig.transpose("time", "channel").values, sig.fs, **kwargs
+        )
+    else:
+        print("Single channel spectrogram")
+        freqs, spg_time, spg = single_spectrogram_welch(sig.values, sig.fs, **kwargs)
 
     time = sig.time.values.min() + spg_time
     timedelta = sig.timedelta.values.min() + pd.to_timedelta(spg_time, "s")
     datetime = sig.datetime.values.min() + pd.to_timedelta(spg_time, "s")
 
-    xarray_spg = xr.DataArray(
-        spg,
-        dims=("frequency", "time", "channel"),
-        coords={
-            "frequency": freqs,
-            "time": time,
-            "channel": sig.channel.values,
-            "timedelta": ("time", timedelta),
-            "datetime": ("time", datetime),
-        },
-        attrs={"units": f"{sig.units}^2/Hz"},
-    )
+    if "channel" in sig.dims:
+        xarray_spg = xr.DataArray(
+            spg,
+            dims=("frequency", "time", "channel"),
+            coords={
+                "frequency": freqs,
+                "time": time,
+                "channel": sig.channel.values,
+                "timedelta": ("time", timedelta),
+                "datetime": ("time", datetime),
+            },
+            attrs={"units": f"{sig.units}^2/Hz"},
+        )
+    else:
+        xarray_spg = xr.DataArray(
+            spg,
+            dims=("frequency", "time"),
+            coords={
+                "frequency": freqs,
+                "time": time,
+                "timedelta": ("time", timedelta),
+                "datetime": ("time", datetime),
+            },
+            attrs={"units": f"{sig.units}^2/Hz"},
+        )
 
     # return xarray_spg with default dimension = datetime
     return xarray_spg.swap_dims({"time": "datetime"})
@@ -420,6 +438,23 @@ def filt_bp_set_by_state(bp_set, hyp, state):
     return bp_set
 
 
+def bp_melt(bp, bp_def=bands):
+    """Melts a bandpower set to long-form.
+
+    Parameters:
+    -----------
+    bp_def: bandpower dictionary, supplied automatically from kdephys.utils.spectral
+    """
+
+    bp_melt = pd.melt(
+        bp,
+        id_vars=["datetime", "channel", "store", "state"],
+        value_vars=list(bp_def.keys()),
+    )
+    bp_melt.columns = ["datetime", "channel", "store", "state", "Band", "Bandpower"]
+    return bp_melt
+
+
 """
 POWER SPECTRAL DENSITY
 -----------------------
@@ -465,3 +500,22 @@ def get_psd_rel2bl(bl_spg, exp_spg, bl_hyp, exp_hyp, state, chan, median=True):
     bl_psd = get_ss_psd(bl_spg, bl_hyp, state, median=median)
     exp_psd = get_ss_psd(exp_spg, exp_hyp, state, median=median)
     return (exp_psd / bl_psd * 100).sel(channel=chan)
+
+
+def get_muscle_energy(m, window_length=8, overlap=1):
+    fs = m.fs
+    m_data = m.values
+    nperseg = int(window_length * fs)
+    noverlap = int(overlap * fs)
+    nstep = nperseg - noverlap
+    shape = m_data.shape[:-1] + ((m_data.shape[-1] - noverlap) // nstep, nperseg)
+    strides = m_data.strides[:-1] + (nstep * m_data.strides[-1], m_data.strides[-1])
+    chunked_data = np.lib.stride_tricks.as_strided(m_data, shape=shape, strides=strides)
+
+    energies = np.empty(0)
+    for chunk in chunked_data:
+        abs_chunk = np.absolute(chunk)
+        energy_of_chunk = abs_chunk.mean()
+        energies = np.append(energies, energy_of_chunk)
+
+    return energies
