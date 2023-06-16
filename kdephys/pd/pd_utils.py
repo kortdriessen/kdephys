@@ -4,6 +4,7 @@ import xarray as xr
 import numpy as np
 import tdt
 import kdephys.hypno as kh
+import math
 
 
 def load_saved_dataset(path_root, cond_list, type):
