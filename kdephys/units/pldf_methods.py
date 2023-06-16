@@ -12,6 +12,11 @@ def ch(self, chan: int):
 
 
 @uf.register_pldf_method
+def st(self, state: str):
+    return self.filter(pl.col("state") == state)
+
+
+@uf.register_pldf_method
 def cid(self, cid: int):
     return self.filter(pl.col("cluster_id") == cid)
 
@@ -143,3 +148,43 @@ def frates(self):
     return self.with_columns(
         (pl.col("count") / pl.col("bout_duration")).alias("fr")
     ).drop("count", "bout_duration")
+
+
+@uf.register_pldf_method
+def oots(self, t1, t2):
+    """slices the dataframe between t1 and t2, decides which column to slice based on the type f=of t1 and t2
+
+    Args:
+        t1 (str, datetime64, int): time to start slicing
+        t2 (str, datetime64, int): time to end slicing
+    """
+    return self.filter(
+        (pl.col("start_datetime") >= t1) & (pl.col("start_datetime") <= t2)
+    )
+
+
+@uf.register_pldf_method
+def offs(self):
+    return self.filter(pl.col("status") == "off")
+
+
+@uf.register_pldf_method
+def ons(self):
+    return self.filter(pl.col("status") == "on")
+
+
+@uf.register_pldf_method
+def tz(self, tz):
+    return self.filter(pl.col("time_zone") == tz)
+
+
+@uf.register_pldf_method
+def cltz(self):
+    """Clear the time_zone column"""
+    return self.with_columns(pl.lit(None).alias("time_zone"))
+
+
+@uf.register_pldf_method
+def cl(self, col: str):
+    """Clear any Column"""
+    return self.with_columns(pl.lit(None).alias(col))

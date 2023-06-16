@@ -91,7 +91,7 @@ def ts(self, t1, t2):
 
 @pf.register_dataframe_method
 def oots(self, t1, t2):
-    """slices the dataframe between t1 and t2, decides which column to slice based on the type of t1 and t2
+    """time selection for on-off dataframes
 
     Args:
         t1 (str, datetime64, int): time to start slicing
@@ -114,19 +114,27 @@ def oots(self, t1, t2):
         elif "end_datetime" not in self.columns:
             return self.loc[np.logical_and(self.index >= t1, self.index <= t2)]
     elif np.logical_or(type(t1) == int, type(t1) == float):
-        if "end_time" in self.columns:
-            return self.loc[np.logical_and(self.end_time >= t1, self.end_time <= t2)]
-        elif "end_time" not in self.columns:
-            return self.loc[np.logical_and(self.index >= t1, self.index <= t2)]
+        return self.loc[np.logical_and(self.start_time >= t1, self.end_time <= t2)]
     else:
         print(f"t1 and t2 must be strings, datetime64, integers, or floats")
 
 
 @pf.register_dataframe_method
-def off_only(self):
-    return self.loc[self.state == "off"]
+def hts(self, t1, t2):
+    """time selection for hypnograms"""
+    return self.loc[(self.start_time >= t1) & (self.end_time <= t2)]
 
 
 @pf.register_dataframe_method
-def on_only(self):
-    return self.loc[self.state == "on"]
+def offs(self):
+    return self.loc[self.status == "off"]
+
+
+@pf.register_dataframe_method
+def ons(self):
+    return self.loc[self.status == "on"]
+
+
+@pf.register_dataframe_method
+def tz(self, time_zone):
+    return self.loc[self.time_zone == time_zone]
