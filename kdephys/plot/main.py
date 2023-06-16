@@ -65,6 +65,7 @@ def shade_hypno_for_me(hypnogram, ax=None, xlim=None):
     ax.set_xlim(xlim)
     return ax
 
+
 def add_light_schedule(times, ax=None, xlim=None):
     """add a bar to indicate light/dark periods at the top of an axes.
 
@@ -79,17 +80,18 @@ def add_light_schedule(times, ax=None, xlim=None):
 
     ax = check_ax(ax)
     for i, time in enumerate(times):
-        if i == len(times)-1:
+        if i == len(times) - 1:
             break
         elif i % 2 == 0:
-            ax.axvspan(time, times[i+1], ymin=0.98, ymax=1, color='gold')
+            ax.axvspan(time, times[i + 1], ymin=0.98, ymax=1, color="gold")
         else:
-            ax.axvspan(time, times[i+1], ymin=0.98, ymax=1, color='darkblue')
+            ax.axvspan(time, times[i + 1], ymin=0.98, ymax=1, color="darkblue")
 
     ax.set_xlim(xlim)
     return ax
 
-def mark_stim(start, end, ax=None, xlim=None, color='red'):
+
+def mark_stim(start, end, ax=None, xlim=None, color="red"):
     """add a markings to an axis to indicate the start end end of a stimulus
 
     Parameters
@@ -102,19 +104,20 @@ def mark_stim(start, end, ax=None, xlim=None, color='red'):
     xlim = ax.get_xlim() if (ax and not xlim) else xlim
 
     ax = check_ax(ax)
-    ax.axvline(start, color=color, linestyle='--', linewidth=2.2)
-    ax.axvline(end, color=color, linestyle='--', linewidth=2.2)
+    ax.axvline(start, color=color, linestyle="--", linewidth=2.2)
+    ax.axvline(end, color=color, linestyle="--", linewidth=2.2)
 
     ax.set_xlim(xlim)
     return ax
 
-def mark_single_stim(df, ax=None, xlim=None, color='red'):
-    start = df.stm().datetime.min() if 'datetime' in df else df.stm().index.min()
-    end = df.stm().datetime.max() if 'datetime' in df else df.stm().index.max()
+
+def mark_single_stim(df, ax=None, xlim=None, color="red"):
+    start = df.stm().datetime.min() if "datetime" in df else df.stm().index.min()
+    end = df.stm().datetime.max() if "datetime" in df else df.stm().index.max()
     return mark_stim(start, end, ax, xlim, color)
 
-def plot_shaded_bp(bp_set, chan, band, hyp, ax):
 
+def plot_shaded_bp(bp_set, chan, band, hyp, ax):
     bp = bp_set[band].sel(channel=chan)
     bp = xu.get_smoothed_da(bp, smoothing_sigma=6)
 
@@ -129,7 +132,7 @@ def plot_shaded_bp(bp_set, chan, band, hyp, ax):
 
 def spectro_plotter(
     spg,
-    chan,
+    chan=None,
     f_range=slice(0, 35),
     t_range=None,
     yscale="linear",
@@ -139,11 +142,12 @@ def spectro_plotter(
     title="Title",
     ax=None,
 ):
+    spg = spg.sel(frequency=f_range)
     try:
         # spg = spg.swap_dims({'datetime': 'time'})
-        spg = spg.sel(channel=chan, frequency=f_range)
-    except IndexError:
-        print("Already had time dimension - passing index error")
+        spg = spg.sel(channel=chan)
+    except:
+        print("Passing error - no channel dimension")
 
     freqs = spg.frequency
     spg_times = spg.datetime.values
@@ -191,7 +195,6 @@ def plot_bp_and_spectro(spg, chan, hyp, bp_def, band, fig_size=(35, 10)):
     return fig
 
 
-
 def compare_psd(
     psd1,
     psd2,
@@ -227,43 +230,17 @@ def compare_psd(
     return g
 
 
-def plot_bp_set(bp_set, hyp, channel, ss=12, figsize=(30, 30), title=None):
-    bp_set = bp_set.sel(channel=channel)
-    bp_set = xu.get_smoothed_ds(bp_set, smoothing_sigma=ss)
-
-    bands = list(bp_set.keys())
-    ax_index = np.arange(0, len(list(bands)))
-
-    fig, axes = plt.subplots(ncols=1, nrows=len(bands), figsize=figsize)
-
-    for i, k in zip(ax_index, bands):
-        fr = bp_set[k].f_range
-        fr_str = "(" + str(fr[0]) + " -> " + str(fr[1]) + " Hz)"
-        ax = sns.lineplot(x=bp_set[k].datetime, y=bp_set[k], ax=axes[i])
-        ax.set_ylabel("Raw " + k.capitalize() + " Power")
-        ax.set_title(k.capitalize() + " Bandpower " + fr_str)
-    fig.suptitle(title)
-    fig.tight_layout(pad=1.5)
-    return fig, axes
+def bp_plot(bp, ax, hyp=None):
+    ax.plot(bp.datetime, bp)
+    if hyp is not None:
+        shade_hypno_for_me(hyp, ax)
+    add_light_schedule(bp.light_schedule(), ax)
+    return ax
 
 
-def get_muscle_energy(m, window_length=8, overlap=1):
-    fs = m.fs
-    m_data = m.values
-    nperseg = int(window_length * fs)
-    noverlap = int(overlap * fs)
-    nstep = nperseg - noverlap
-    shape = m_data.shape[:-1] + ((m_data.shape[-1] - noverlap) // nstep, nperseg)
-    strides = m_data.strides[:-1] + (nstep * m_data.strides[-1], m_data.strides[-1])
-    chunked_data = np.lib.stride_tricks.as_strided(m_data, shape=shape, strides=strides)
-
-    energies = np.empty(0)
-    for chunk in chunked_data:
-        abs_chunk = np.absolute(chunk)
-        energy_of_chunk = abs_chunk.mean()
-        energies = np.append(energies, energy_of_chunk)
-
-    return energies
+def _title(ax, subject, exp, extra=""):
+    ax.set_title(f"{subject} | {exp} | {extra}", fontsize=18, fontweight="bold")
+    return ax
 
 
 def plot_muscle(
@@ -304,7 +281,8 @@ def plot_muscle(
     fig.tight_layout(pad=1.5)
     return fig, axes
 
-def quick_bp_channel_plot(bp, band='delta'):
+
+def quick_bp_channel_plot(bp, band="delta"):
     for store in bp.store.values:
         for chan in bp.channel.values:
             f, ax = plt.subplots()
