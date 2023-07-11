@@ -20,6 +20,9 @@ setup(
         "seaborn",
         "pandas_flavor",
         "spikeinterface",
+        "polars",
+        "lazy_loader",
+        "netCDF4",
     ],
     zip_safe=False,
 )
