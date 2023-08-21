@@ -179,6 +179,11 @@ def tz(self, tz):
 
 
 @uf.register_pldf_method
+def flt(self, col, val):
+    return self.filter(pl.col(col) == val)
+
+
+@uf.register_pldf_method
 def cltz(self):
     """Clear the time_zone column"""
     return self.with_columns(pl.lit(None).alias("time_zone"))

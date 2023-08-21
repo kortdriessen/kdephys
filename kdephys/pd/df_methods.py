@@ -18,6 +18,16 @@ def rec(self, rec):
 
 
 @pf.register_dataframe_method
+def exp_als(self, exp):
+    return self.loc[self.exp_alias == exp]
+
+
+@pf.register_dataframe_method
+def expmt(self, exp):
+    return self.loc[self["exp"] == exp]
+
+
+@pf.register_dataframe_method
 def stm(self):
     return self.loc[self.stim == 1]
 
