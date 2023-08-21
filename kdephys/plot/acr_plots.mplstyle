@@ -9,7 +9,7 @@ axes.prop_cycle: cycler('color', ['363636', '3f5cfc', 'FD864A'])
 
 # Main Figure Properties
 figure.facecolor: FFFFFF
-figure.titlesize:   23     # size of the figure title (``Figure.suptitle()``)
+figure.titlesize:   38     # size of the figure title (``Figure.suptitle()``)
 figure.titleweight: bold    # weight of the figure title
 
 # Main Axes Properties
@@ -18,11 +18,11 @@ axes.facecolor: FFFFFF
 # Axes Title styling
 axes.titlelocation: left        # alignment of the title: {left, right, center}
 axes.titlepad: 6               # pad between axes and title in points
-axes.titlesize: 35              # font size of the axes title
+axes.titlesize: 34              # font size of the axes title
 axes.titleweight: normal          # font weight of title
 
 # Grid Properties
-axes.grid: True                 # display grid or not
+axes.grid: False                 # display grid or not
 axes.grid.axis: y               # which axis the grid should apply to          
 grid.linewidth: 1               # in points
 grid.color: 6E6E6E              # grid color
@@ -46,18 +46,18 @@ figure.subplot.bottom: 0.07     # the bottom of the subplots of the figure
 figure.subplot.hspace: 0.3    # the amount of height reserved for space between subplots, expressed as a fraction of the average axis height
 
 figure.figsize: 40, 12          # figure size in inches
-figure.dpi: 50                 # figure dots per inch
+figure.dpi: 300                 # figure dots per inch
 
 # Setting font sizes and spacing
-axes.labelsize: 18              # font size of the x and y labels
-xtick.labelsize: 20             # font size of the x tick labels      
-ytick.labelsize: 14             # font size of the y tick labels
+axes.labelsize: 34              # font size of the x and y labels
+xtick.labelsize: 28             # font size of the x tick labels      
+ytick.labelsize: 28             # font size of the y tick labels
 font.size: 18                   # default font size for text, given in points.
 xtick.major.pad: 8              # distance to major tick label in points  
 ytick.major.pad: 12
 
 # Remove major and minor ticks except for on the x-axis.
-xtick.major.size: 8             # major tick size in points
+xtick.major.size: 12             # major tick size in points
 xtick.minor.size: 0             # minor tick size in points
 ytick.major.size: 0
 ytick.minor.size: 0
