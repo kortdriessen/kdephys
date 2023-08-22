@@ -4,7 +4,7 @@ import numpy as np
 
 
 def check_sorting_thresholds(threshes=[4, 10, 3]):
-    params_path = "/home/kdriessen/gh_t2/pipeline_tdt/pipeline_tdt/params/params.yaml"
+    params_path = "/home/kdriessen/gh_master/pipeline_tdt/pipeline_tdt/params/params.yaml"
     with open(params_path, "r") as fp:
         params = list(yaml.safe_load_all(fp))
     proj_thresh = params[1]["analysis_params"]["ks2_5_base"]["projection_threshold"]
