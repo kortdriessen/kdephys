@@ -230,8 +230,35 @@ def compare_psd(
     return g
 
 
-def bp_plot(bp, ax, hyp=None):
-    ax.plot(bp.datetime, bp)
+def gen_xr_plotter(da, ax, hyp, color=None):
+    """A general function to plot xarray dataarrays, with hypnogram shading and the addition of light schedules.
+
+    Parameters
+    ----------
+    da : _type_
+        _description_
+    ax : _type_
+        _description_
+    hyp : _type_
+        _description_
+    color : _type_, optional
+        _description_, by default None
+    """
+    if color == None:
+        ax.plot(da.datetime, da)
+    else:
+        ax.plot(da.datetime, da, color=color, linewidth=6)
+    if hyp is not None:
+        shade_hypno_for_me(hyp, ax)
+    add_light_schedule(da.light_schedule(), ax)
+    return ax
+
+
+def bp_plot(bp, ax, hyp=None, color=None):
+    if color == None:
+        ax.plot(bp.datetime, bp)
+    else:
+        ax.plot(bp.datetime, bp, color=color, linewidth=6)
     if hyp is not None:
         shade_hypno_for_me(hyp, ax)
     add_light_schedule(bp.light_schedule(), ax)

@@ -403,7 +403,7 @@ def get_bp_set(spg, bands=bands):
     bp_ds = xr.Dataset({})
     bp_vars = {}
     keys = list(bands.keys())
-
+    
     for k in keys:
         bp_vars[k] = get_bandpower(spg, bands[k])
 
