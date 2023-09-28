@@ -22,7 +22,7 @@ axes.titlesize: 34              # font size of the axes title
 axes.titleweight: normal          # font weight of title
 
 # Grid Properties
-axes.grid: False                 # display grid or not
+axes.grid: True                 # display grid or not
 axes.grid.axis: y               # which axis the grid should apply to          
 grid.linewidth: 1               # in points
 grid.color: 6E6E6E              # grid color
@@ -37,7 +37,7 @@ axes.spines.right: False
 axes.spines.bottom: True
 
 # Set line styling for line plots
-lines.linewidth: 2.0            # line width in points
+lines.linewidth: 3.0            # line width in points
 
 # Set spacing for figure and also DPI.
 figure.subplot.left: 0.1       # the left side of the subplots of the figure
@@ -46,7 +46,7 @@ figure.subplot.bottom: 0.07     # the bottom of the subplots of the figure
 figure.subplot.hspace: 0.3    # the amount of height reserved for space between subplots, expressed as a fraction of the average axis height
 
 figure.figsize: 40, 12          # figure size in inches
-figure.dpi: 300                 # figure dots per inch
+figure.dpi: 50                 # figure dots per inch
 
 # Setting font sizes and spacing
 axes.labelsize: 34              # font size of the x and y labels
