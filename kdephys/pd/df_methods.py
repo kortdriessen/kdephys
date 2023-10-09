@@ -48,8 +48,13 @@ def cid_un(self):
 
 
 @pf.register_dataframe_method
-def prb(self, probe="NNXr"):
-    return self.loc[self.probe == probe]
+def prb(self, probe):
+    if 'probe' in self.columns:
+        return self.loc[self.probe == probe]
+    elif 'store' in self.columns:
+        return self.loc[self.store == probe]
+    else:
+        print('probe or store column not found')
 
 
 @pf.register_dataframe_method
