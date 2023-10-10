@@ -182,6 +182,9 @@ def tz(self, tz):
 def flt(self, col, val):
     return self.filter(pl.col(col) == val)
 
+@uf.register_pldf_method
+def xflt(self, col, val):
+    return self.filter(pl.col(col) != val)
 
 @uf.register_pldf_method
 def cltz(self):
