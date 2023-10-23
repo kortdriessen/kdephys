@@ -16,6 +16,13 @@ def xnote(self, notes=["noisy", "bw"]):
 def rec(self, rec):
     return self.loc[self.recording == rec]
 
+@pf.register_dataframe_method
+def sbj(self, subject):
+    return self.loc[self.subject == subject]
+
+@pf.register_dataframe_method
+def chnl(self, channel):
+    return self.loc[self.channel == channel]
 
 @pf.register_dataframe_method
 def exp_als(self, exp):
