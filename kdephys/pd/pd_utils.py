@@ -5,7 +5,7 @@ import numpy as np
 import tdt
 import kdephys.hypno as kh
 import math
-
+from scipy.ndimage import gaussian_filter
 
 def load_saved_dataset(path_root, cond_list, type):
     ds = {}
@@ -77,6 +77,11 @@ def add_states_to_dataset(dataset, hypnos):
                 dataset[key] = add_states_to_data(dataset[key], hypnos[cond])
                 break
     return dataset
+
+def smooth(df, col, sigma=12):
+    smoothed_data = gaussian_filter(df[col].values, sigma)
+    df[col] = smoothed_data
+    return df
 
 
 ## INCOMPLETE -----------------------------------------------------------------------------------------------------------

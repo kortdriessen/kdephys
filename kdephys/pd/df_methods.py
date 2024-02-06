@@ -3,7 +3,10 @@ import spikeinterface.extractors as se
 import numpy as np
 import pandas as pd
 import pandas_flavor as pf
+from kdephys.pd.pd_utils import smooth
 
+import kdephys.utils.spectral as sp
+bands = sp.bands
 # ----------------------------------------- for General Unit/Info Dataframes ------------------------------------------
 
 
@@ -78,6 +81,9 @@ def st(self, state):
 def sid(self, sort_id):
     return self.loc[self.sort_id == sort_id]
 
+@pf.register_dataframe_method
+def sm(self, col, sigma=12):
+    return smooth(self, col, sigma=sigma)
 
 @pf.register_dataframe_method
 def ts(self, t1, t2):
@@ -106,6 +112,21 @@ def ts(self, t1, t2):
             return self.loc[np.logical_and(self.index >= t1, self.index <= t2)]
     else:
         print(f"t1 and t2 must be strings, datetime64 or integers")
+
+@pf.register_dataframe_method
+def bpmlt(self, bp_def=bands):
+    """Melts a bandpower set to long-form.
+
+    Parameters:
+    -----------
+    bp_def: bandpower dictionary, supplied automatically from kdephys.utils.spectral
+    """
+    bp_melt = pd.melt(
+        self, id_vars=["datetime", "channel"], value_vars=list(bp_def.keys())
+    )
+    bp_melt.columns = ["datetime", "channel", "band", "power"]
+    return bp_melt
+
 
 
 # ----------------------------------------- METHODS FOR ON-OFF DATAFRAMES ------------------------------------------------------
