@@ -1,7 +1,7 @@
 import tdt
 import xarray as xr
 from scipy.stats import mode
-from scipy.ndimage import gaussian_filter1d
+from scipy.ndimage import gaussian_filter1d, gaussian_filter
 import scipy.signal as signal
 import numpy as np
 import pandas as pd
@@ -32,6 +32,32 @@ def gaussian_smooth(data, sigma, sampling_frequency, axis=0, truncate=8):
 
     return gaussian_filter1d(
         data, sigma * sampling_frequency, truncate=truncate, axis=axis, mode="constant"
+    )
+
+def gaussian_smooth_md(data, sigma, sampling_frequency=0.5, truncate=6):
+    """1D convolution of the data with a Gaussian.
+
+    The standard deviation of the gaussian is in the units of the sampling
+    frequency. The function is just a wrapper around scipy's
+    `gaussian_filter1d`, The support is truncated at 8 by default, instead
+    of 4 in `gaussian_filter1d`
+
+    Parameters
+    ----------
+    data : array_like
+    sigma : float
+    sampling_frequency : int
+    
+    truncate : int, optional
+
+    Returns
+    -------
+    smoothed_data : array_like
+
+    """
+
+    return gaussian_filter(
+        data, sigma * sampling_frequency, truncate=truncate, mode="constant"
     )
 
 

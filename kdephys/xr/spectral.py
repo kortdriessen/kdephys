@@ -3,11 +3,12 @@ import pandas as pd
 import xarray as xr
 import kdephys.plot.main as kp
 import kdephys.hypno as hp
-import kdephys.utils.spectral as sp
+
 from scipy.signal import spectrogram
 from functools import partial
 from multiprocessing import Pool
 
+import kdephys.utils.spectral as sp
 bands = sp.bands
 """
 Functions taken directly from ecephys.signal.timefrequency to remove dependency on ecephys package

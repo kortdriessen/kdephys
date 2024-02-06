@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 ##Functions for loading TDT SEV-stores
-def sev_to_xarray(info, store):
+def sev_to_xarray(info, store, start_date=None):
     """Convert a single stream store to xarray format.
 
     Paramters:
@@ -31,6 +31,9 @@ def sev_to_xarray(info, store):
     timedelta = pd.to_timedelta(time, "s")
     datetime = pd.to_datetime(info.start_date) + timedelta
 
+    if start_date is not None:
+        datetime = start_date + timedelta
+    
     volts_to_microvolts = 1e6
     # had to add this try-except because stupid TDT defines 'channels' for EEG/LFP, but 'channel' for EMG.
     try:
@@ -112,12 +115,12 @@ def load_tev_store(path, t1=0, t2=0, channel=None, store=""):
     return datax
 
 
-def load_sev_store(path, t1=0, t2=0, channel=None, store=""):
+def load_sev_store(path, t1=0, t2=0, channel=None, store="", start_date=None):
 
     data = tdt.read_block(path, channel=channel, store=store, t1=t1, t2=t2)
     store = data.streams[store]
     info = data.info
-    datax = sev_to_xarray(info, store)
+    datax = sev_to_xarray(info, store, start_date=start_date)
     return datax
 
 
@@ -130,9 +133,10 @@ def get_data(
     sev=True,
     pandas=False,
     sel_chan=False,
+    start_date=None,
 ):
     if sev == True:
-        data = load_sev_store(block_path, t1=t1, t2=t2, channel=channel, store=store)
+        data = load_sev_store(block_path, t1=t1, t2=t2, channel=channel, store=store, start_date=start_date)
     else:
         data = load_tev_store(block_path, t1=t1, t2=t2, channel=channel, store=store)
     try:
