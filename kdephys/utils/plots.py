@@ -11,6 +11,6 @@ hypno_colors = {
     "Wake-art": "crimson",
     "Unsure": "white",
     "Good": "lime",
-    "Wake-Good": "forestgreen",
+    "Wake-Good": "turquoise",
     "Sort-Exclude": "coral",
 }
