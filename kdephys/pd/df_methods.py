@@ -127,6 +127,18 @@ def bpmlt(self, bp_def=bands):
     bp_melt.columns = ["datetime", "channel", "band", "power"]
     return bp_melt
 
+@pf.register_dataframe_method
+def exp_names(self):
+    """
+    Gives all experiments a common name for plotting purposes. swi2 and swisin2 are replaced with swi and swisin
+    """
+    assert "exp" in self.columns, "exp column not found"
+    new = self.copy()
+    if 'swi2' in new.exp.unique():
+        new.exp = new.exp.replace('swi2', 'swi')
+    if 'swisin2' in new.exp.unique():
+        new.exp = new.exp.replace('swisin2', 'swisin')
+    return new
 
 
 # ----------------------------------------- METHODS FOR ON-OFF DATAFRAMES ------------------------------------------------------
