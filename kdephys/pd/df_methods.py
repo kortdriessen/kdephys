@@ -36,6 +36,9 @@ def exp_als(self, exp):
 def expmt(self, exp):
     return self.loc[self["exp"] == exp]
 
+@pf.register_dataframe_method
+def exptype(self, exptype):
+    return self.loc[self["exp_type"] == exptype]
 
 @pf.register_dataframe_method
 def stm(self):

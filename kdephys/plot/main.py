@@ -133,7 +133,7 @@ def plot_shaded_bp(bp_set, chan, band, hyp, ax):
 def spectro_plotter(
     spg,
     chan=None,
-    f_range=slice(0, 35),
+    f_range=None,
     t_range=None,
     yscale="linear",
     figsize=(35, 10),
@@ -142,7 +142,9 @@ def spectro_plotter(
     title="Title",
     ax=None,
 ):
-    spg = spg.sel(frequency=f_range)
+    if f_range != None:
+        spg = spg.sel(frequency=f_range)
+    
     try:
         # spg = spg.swap_dims({'datetime': 'time'})
         spg = spg.sel(channel=chan)
