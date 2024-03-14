@@ -1,5 +1,5 @@
 path.simplify: True
-path.simplify_threshold: 0.9
+path.simplify_threshold: 0.99
 
 # Legend Properties
 legend.loc: lower right
@@ -9,39 +9,35 @@ axes.prop_cycle: cycler('color', ['363636', '3f5cfc', 'FD864A'])
 
 # Main Figure Properties
 figure.facecolor: FFFFFF
-figure.titlesize:   23     # size of the figure title (``Figure.suptitle()``)
+figure.titlesize:   38     # size of the figure title (``Figure.suptitle()``)
 figure.titleweight: bold    # weight of the figure title
-figure.edgecolor: 000000
 
 # Main Axes Properties
 axes.facecolor: FFFFFF
-axes.edgecolor: 000000
-axes.labelcolor: 000000
-axes.titlecolor: 000000
 
 # Axes Title styling
 axes.titlelocation: left        # alignment of the title: {left, right, center}
 axes.titlepad: 6               # pad between axes and title in points
-axes.titlesize: 20              # font size of the axes title
+axes.titlesize: 34              # font size of the axes title
 axes.titleweight: normal          # font weight of title
 
 # Grid Properties
 axes.grid: True                 # display grid or not
 axes.grid.axis: y               # which axis the grid should apply to          
 grid.linewidth: 1               # in points
-grid.color: A7A7A7              # grid color
+grid.color: 6E6E6E              # grid color
 grid.linestyle: dashed
 axes.axisbelow: True            # Sets axis gridlines below lines and patches.
 
 # Style spines
-axes.linewidth: 3                # Spine edge line width
-axes.spines.top: True          # Display axis spines (True or False)
+axes.linewidth: 3             # Spine edge line width
+axes.spines.top: False          # Display axis spines (True or False)
 axes.spines.left: True          # We only want the left and bottom spines
-axes.spines.right: True
+axes.spines.right: False
 axes.spines.bottom: True
 
 # Set line styling for line plots
-lines.linewidth: 2.0            # line width in points
+lines.linewidth: 3.0            # line width in points
 
 # Set spacing for figure and also DPI.
 figure.subplot.left: 0.1       # the left side of the subplots of the figure
@@ -53,22 +49,15 @@ figure.figsize: 40, 12          # figure size in inches
 figure.dpi: 50                 # figure dots per inch
 
 # Setting font sizes and spacing
-axes.labelsize: 42              # font size of the x and y labels
-xtick.labelsize: 32             # font size of the x tick labels      
-ytick.labelsize: 32             # font size of the y tick labels
+axes.labelsize: 34              # font size of the x and y labels
+xtick.labelsize: 28             # font size of the x tick labels      
+ytick.labelsize: 28             # font size of the y tick labels
 font.size: 18                   # default font size for text, given in points.
 xtick.major.pad: 8              # distance to major tick label in points  
 ytick.major.pad: 12
-xtick.color: 000000             # color of the tick labels
-ytick.color: 000000
-ytick.labelcolor: 000000
 
 # Remove major and minor ticks except for on the x-axis.
-xtick.major.size: 0             # major tick size in points
+xtick.major.size: 12             # major tick size in points
 xtick.minor.size: 0             # minor tick size in points
-ytick.major.size: 8
-ytick.major.width: 4
+ytick.major.size: 0
 ytick.minor.size: 0
-
-legend.edgecolor: 000000
-legend.labelcolor: 000000

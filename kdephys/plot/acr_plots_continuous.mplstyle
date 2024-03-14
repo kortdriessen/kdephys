@@ -41,7 +41,7 @@ axes.spines.right: True
 axes.spines.bottom: True
 
 # Set line styling for line plots
-lines.linewidth: 2.0            # line width in points
+lines.linewidth: 5            # line width in points
 
 # Set spacing for figure and also DPI.
 figure.subplot.left: 0.1       # the left side of the subplots of the figure
@@ -64,7 +64,8 @@ ytick.color: 000000
 ytick.labelcolor: 000000
 
 # Remove major and minor ticks except for on the x-axis.
-xtick.major.size: 0             # major tick size in points
+xtick.major.size: 12             # major tick size in points
+xtick.major.width: 6
 xtick.minor.size: 0             # minor tick size in points
 ytick.major.size: 8
 ytick.major.width: 4
