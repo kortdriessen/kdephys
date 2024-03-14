@@ -62,10 +62,18 @@ def gaussian_smooth_md(data, sigma, sampling_frequency=0.5, truncate=6):
 
 
 def estimate_fs(da):
-    sample_period = mode(np.diff(da.datetime.values), keepdims=True).mode[0]
-    assert isinstance(sample_period, np.timedelta64)
-    sample_period = sample_period / pd.to_timedelta(1, "s")
-    return 1 / sample_period
+    if 'datetime' in da.dims:
+        sample_period = mode(np.diff(da.datetime.values), keepdims=True).mode[0]
+        assert isinstance(sample_period, np.timedelta64)
+        sample_period = sample_period / pd.to_timedelta(1, "s")
+        return 1 / sample_period
+    elif 'time' in da.dims:
+        sample_period = mode(np.diff(da.time.values), keepdims=True).mode[0]
+        #assert isinstance(sample_period, np.timedelta64)
+        #sample_period = sample_period / pd.to_timedelta(1, "s")
+        return 1 / sample_period
+    else:
+        raise ValueError("No time or datetime dimension found")
 
 
 def get_smoothed_da(da, smoothing_sigma=10, in_place=False):

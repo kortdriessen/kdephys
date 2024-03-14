@@ -86,7 +86,8 @@ def sid(self, sort_id):
 
 @pf.register_dataframe_method
 def sm(self, col, sigma=12):
-    return smooth(self, col, sigma=sigma)
+    new = self.copy()
+    return smooth(new, col, sigma=sigma)
 
 @pf.register_dataframe_method
 def ts(self, t1, t2):

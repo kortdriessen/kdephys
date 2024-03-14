@@ -6,7 +6,6 @@ import kdephys.xr.utils as xu
 import kdephys.xr.spectral as xsp
 from kdephys.utils.plots import hypno_colors
 
-
 # This function is taken directly from neurodsp.plts.utils.
 # We cannot use the neurodsp package, because a critical IBL library shadows the name.
 def check_ax(ax, figsize=None):
@@ -49,6 +48,7 @@ def shade_hypno_for_me(hypnogram, ax=None, xlim=None):
     ax: matplotlib.Axes, optional
         An axes upon which to plot.
     """
+    from kdephys.utils.plots import hypno_colors
     xlim = ax.get_xlim() if (ax and not xlim) else xlim
 
     ax = check_ax(ax)
@@ -56,7 +56,7 @@ def shade_hypno_for_me(hypnogram, ax=None, xlim=None):
         ax.axvspan(
             bout.start_time,
             bout.end_time,
-            alpha=0.25,
+            alpha=0.15,
             color=hypno_colors[bout.state],
             zorder=1000,
             ec="none",
@@ -152,7 +152,7 @@ def spectro_plotter(
         print("Passing error - no channel dimension")
 
     freqs = spg.frequency
-    spg_times = spg.datetime.values
+    spg_times = spg.datetime.values if "datetime" in spg else spg.time.values
     # freqs, spg_times, spg = dsps.trim_spectrogram(freqs, spg_times, spg, f_range, t_range)
 
     ax = check_ax(ax, figsize=figsize)
@@ -260,7 +260,7 @@ def bp_plot(bp, ax, hyp=None, color=None):
     if color == None:
         ax.plot(bp.datetime, bp)
     else:
-        ax.plot(bp.datetime, bp, color=color, linewidth=6)
+        ax.plot(bp.datetime, bp, color=color, linewidth=8)
     if hyp is not None:
         shade_hypno_for_me(hyp, ax)
     add_light_schedule(bp.light_schedule(), ax)

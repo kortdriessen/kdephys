@@ -1,9 +1,9 @@
 hypno_colors = {
-    "Wake": "forestgreen",
+    "Wake": "#62e273",
     "Brief-Arousal": "chartreuse",
     "Transition-to-NREM": "lightskyblue",
     "Transition-to-Wake": "palegreen",
-    "NREM": "royalblue",
+    "NREM": "cornflowerblue",
     "Transition-to-REM": "plum",
     "REM": "magenta",
     "Transition": "grey",
@@ -11,6 +11,7 @@ hypno_colors = {
     "Wake-art": "crimson",
     "Unsure": "white",
     "Good": "lime",
-    "Wake-Good": "turquoise",
+    #"Wake-Good": "turquoise",
+    "Wake-Good": "#62e273",
     "Sort-Exclude": "coral",
 }
