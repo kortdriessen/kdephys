@@ -3,7 +3,42 @@ import numpy as np
 import pandas as pd
 import math
 import kdephys.unit_flavor as uf
-from acr.pl_units import bout_duration_similarity_check
+
+def bout_duration_similarity_check(df, col="bout_duration"):
+    """checks whether all values in the 'bout_duration' column are the same. If not, it checks for how different they are and if the difference is very small, it rectifies them so all values are the same.
+
+    Parameters
+    ----------
+    df : pl.DataFrame
+        polars dataframe with 'bout_duration' column
+    """
+    if all(
+        df[col] == df[col][0]
+    ):  # if all values are already equal, just return the dataframe
+        return df
+    else:
+        mask = (
+            df[col] == df[col][0]
+        )  # if all vals not equal, check first how different they are; if the diff is small, rectify.
+        for dur in df[
+            col
+        ]:  # this is a check that the difference between the bout_durations is very small.
+            if dur != df[col][0]:
+                diff = abs(dur - df[col][0])
+                if diff < 1e-7:
+                    continue
+                else:
+                    raise ValueError(
+                        f"difference between bouts is too large! Diff = {diff}"
+                    )
+        new_val = df[col][
+            0
+        ]  # given that the difference between bouts is very small, we can just set all bouts to the first bout duration
+        df = df.with_columns(
+            pl.when(~mask).then(new_val).otherwise(pl.col(col)).alias(col)
+        )
+        assert all(df[col] == df[col][0])  # check that all values are now equal
+        return df
 
 
 @uf.register_pldf_method
