@@ -288,8 +288,11 @@ def get_spextrogram(
         freqs, spg_time, spg = single_spectrogram_welch(sig.values, sig.fs, **kwargs)
 
     time = sig.time.values.min() + spg_time
-    timedelta = sig.timedelta.values.min() + pd.to_timedelta(spg_time, "s")
-    datetime = sig.datetime.values.min() + pd.to_timedelta(spg_time, "s")
+    
+    if 'timedelta' in list(sig.coords):
+        timedelta = sig.timedelta.values.min() + pd.to_timedelta(spg_time, "s")
+    if 'datetime' in list(sig.coords):
+        datetime = sig.datetime.values.min() + pd.to_timedelta(spg_time, "s")
 
     if "channel" in sig.dims:
         xarray_spg = xr.DataArray(

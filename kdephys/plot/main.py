@@ -38,7 +38,7 @@ def quick_histo(data):
     return ax
 
 
-def shade_hypno_for_me(hypnogram, ax=None, xlim=None):
+def shade_hypno_for_me(hypnogram, ax=None, xlim=None, alpha=0.15):
     """Shade plot background using hypnogram state.
 
     Parameters
@@ -56,7 +56,7 @@ def shade_hypno_for_me(hypnogram, ax=None, xlim=None):
         ax.axvspan(
             bout.start_time,
             bout.end_time,
-            alpha=0.15,
+            alpha=alpha,
             color=hypno_colors[bout.state],
             zorder=1000,
             ec="none",
