@@ -117,6 +117,9 @@ def load_tev_store(path, t1=0, t2=0, channel=None, store=""):
 
 def load_sev_store(path, t1=0, t2=0, channel=None, store="", start_date=None):
 
+    if channel==None:
+        channel = 0
+    assert channel is not None, "Channel must be specified for SEV data"
     data = tdt.read_block(path, channel=channel, store=store, t1=t1, t2=t2)
     store = data.streams[store]
     info = data.info
