@@ -93,15 +93,25 @@ def get_smoothed_ds(ds, smoothing_sigma=10, in_place=False):
 
 def decimate(sig, q=5):
     dat = signal.decimate(sig.values, q=q, ftype="fir", axis=0)
-    rs = xr.DataArray(
-        dat,
-        dims=sig.dims,
-        coords={
-            **sig["datetime"][::q].coords,
-            **sig[sig.dims[-1]].coords,
-        },
-        attrs=sig.attrs,
-    )
+    if 'channel' in sig.dims:
+        rs = xr.DataArray(
+            dat,
+            dims=sig.dims,
+            coords={
+                **sig["datetime"][::q].coords,
+                **sig[sig.dims[-1]].coords,
+            },
+            attrs=sig.attrs,
+        )
+    else:
+        rs = xr.DataArray(
+            dat,
+            dims=sig.dims,
+            coords={
+                **sig["datetime"][::q].coords,
+            },
+            attrs=sig.attrs,
+        )
     rs.attrs["fs"] = sig.fs / q
     return rs
 
