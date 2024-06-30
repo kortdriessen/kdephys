@@ -28,7 +28,7 @@ def ts(self, t1, t2):
             return t.sel(time=slice(t1, t2)).swap_dims({"time": "datetime"})
         else:
             print(f"there is no dimension named time or datetime in this dataarray")
-    if type(t1) == float:
+    if type(t1) == float or type(t1) == np.float64:
         if "time" in list(self.dims):
             return self.sel(time=slice(t1, t2))
         elif "datetime" in list(self.dims):
@@ -41,6 +41,17 @@ def ts(self, t1, t2):
     else:
         print(f"t1 must be an int, string, pd.Timestamp, or np.datetime64")
 
+@pf.register_xarray_dataarray_method
+def sts(self, t1, t2):
+    assert type(t1) == type(t2), "t1 and t2 must be the same type"
+    assert type(t1) in [int, float, np.float64], "t1 must be an int or float"
+    if "sort_time" in list(self.dims):
+        return self.sel(sort_time=slice(t1, t2))
+    elif "datetime" in list(self.dims):
+        t = self.swap_dims({"datetime": "sort_time"})
+        return t.sel(sort_time=slice(t1, t2)).swap_dims({"sort_time": "datetime"})
+    else:
+        print(f"there is no dimension named sort_time or datetime in this dataarray")
 
 @pf.register_xarray_dataarray_method
 def rec(self, rec):
