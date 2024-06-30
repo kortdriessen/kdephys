@@ -123,7 +123,7 @@ def ts(self, t1, t2):
             t2 = np.datetime64(str(t2))
         assert type(t1) == np.datetime64
         return self.filter((pl.col("datetime") >= t1) & (pl.col("datetime") <= t2))
-    elif np.logical_or(type(t1) == int, type(t1) == float):
+    elif (type(t1) == int) or (type(t1) == float) or (type(t1) == np.float64):
         assert "time" in self.columns
         return self.filter((pl.col("time") >= t1) & (pl.col("time") <= t2))
     else:
