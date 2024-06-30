@@ -197,3 +197,7 @@ def ons(self):
 @pf.register_dataframe_method
 def tz(self, time_zone):
     return self.loc[self.time_zone == time_zone]
+
+@pf.register_dataframe_method
+def dsc(self, descriptor):
+    return self.loc[self['descriptor'] == descriptor]
