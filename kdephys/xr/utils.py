@@ -173,3 +173,61 @@ def rel_by_store(ds, state="NREM", t1=None, t2=None):
     else:
         print("no stores found")
         return None
+
+def rel_by_store_median(ds, state="NREM", t1=None, t2=None):
+    """split a dataset by its stores, then get each store relative to a baseline recording (specified by t1 and t2), filtered by state.
+    Relies on 'state' coordinate being up to date for best results.
+
+    Args:
+    -----------
+        ds (xr.dataset, xr.DataArray): dataset
+        state (str, optional): state to use in calculating the baseline average. Defaults to 'NREM'.
+        t1 (pd.Timestamp, optional): start time of baseline. If not specified, 9am-9pm on the day of the first timestamp will be used. Defaults to None.
+        t2 (pd.Timestamp, optional): end time of baseline. If not specified, 9am-9pm on the day of the first timestamp will be used. Defaults to None.
+    Returns:
+    -----------
+        ds_rel (xr.dataset, xr.DataArray): dataset with each store relative to its baseline average.
+    """
+    ds_stores = {}
+    if len(ds.prbs()) == 1:
+        if t1 == None and t2 == None:
+            rel_day = str(ds.datetime.values.min()).split("T")[0]
+            t1 = pd.Timestamp(rel_day + " 09:00:00")
+            t2 = pd.Timestamp(rel_day + " 21:00:00")
+            avgs = ds.sel(datetime=slice(t1, t2)).st(state).median("datetime")
+            rel_ds = ds / avgs
+            return rel_ds
+        else:
+            assert t1 != None and t2 != None, "must specify both t1 and t2"
+            avgs = ds.sel(datetime=slice(t1, t2)).st(state).median("datetime")
+            rel_ds = ds / avgs
+            return rel_ds
+    elif len(ds.prbs()) > 1:
+        for store in ds.prbs():
+            ds_stores[store] = ds.prb(store)
+        ds_rel = {}
+        for store in ds_stores.keys():
+            if t1 == None and t2 == None:
+                rel_day = str(ds_stores[store].datetime.values.min()).split("T")[0]
+                t1 = pd.Timestamp(rel_day + " 09:00:00")
+                t2 = pd.Timestamp(rel_day + " 21:00:00")
+                avg_vals = (
+                    ds_stores[store]
+                    .st(state)
+                    .sel(datetime=slice(t1, t2))
+                    .median("datetime")
+                )
+                ds_rel[store] = ds.prb(store) / avg_vals
+            else:
+                assert t1 != None and t2 != None, "must specify both t1 and t2"
+                avg_vals = (
+                    ds_stores[store]
+                    .st(state)
+                    .sel(datetime=slice(t1, t2))
+                    .median("datetime")
+                )
+                ds_rel[store] = ds.prb(store) / avg_vals
+        return xr.concat(ds_rel.values(), "store")
+    else:
+        print("no stores found")
+        return None

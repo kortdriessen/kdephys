@@ -25,7 +25,6 @@ def _infer_bout_start(df, bout):
 
     return start_time
 
-
 def load_hypno_file(path, st, dt=True):
     """Load a Visbrain formatted hypnogram."""
     df = pd.read_csv(path, sep="\t", names=["state", "end_time"], comment="*")

@@ -50,7 +50,7 @@ def shade_hypno_for_me(hypnogram, ax=None, xlim=None, alpha=0.15):
     """
     from kdephys.utils.plots import hypno_colors
     xlim = ax.get_xlim() if (ax and not xlim) else xlim
-
+    
     ax = check_ax(ax)
     for bout in hypnogram.itertuples():
         ax.axvspan(
