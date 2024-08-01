@@ -8,13 +8,13 @@ legend.loc: lower right
 axes.prop_cycle: cycler('color', ['363636', '3f5cfc', 'FD864A'])
 
 # Main Figure Properties
-figure.facecolor: e3ceb9
+figure.facecolor: FFFFFF
 figure.titlesize:   23     # size of the figure title (``Figure.suptitle()``)
 figure.titleweight: bold    # weight of the figure title
 figure.edgecolor: 000000
 
 # Main Axes Properties
-axes.facecolor: e3ceb9
+axes.facecolor: FFFFFF
 axes.edgecolor: 000000
 axes.labelcolor: 000000
 axes.titlecolor: 000000
@@ -22,7 +22,7 @@ axes.titlecolor: 000000
 # Axes Title styling
 axes.titlelocation: left        # alignment of the title: {left, right, center}
 axes.titlepad: 6               # pad between axes and title in points
-axes.titlesize: 32              # font size of the axes title
+axes.titlesize: 20              # font size of the axes title
 axes.titleweight: normal          # font weight of title
 
 # Grid Properties
@@ -35,10 +35,10 @@ axes.axisbelow: True            # Sets axis gridlines below lines and patches.
 
 # Style spines
 axes.linewidth: 3                # Spine edge line width
-axes.spines.top: True          # Display axis spines (True or False)
-axes.spines.left: True          # We only want the left and bottom spines
-axes.spines.right: True
-axes.spines.bottom: True
+axes.spines.top: False          # Display axis spines (True or False)
+axes.spines.left: False          # We only want the left and bottom spines
+axes.spines.right: False
+axes.spines.bottom: False
 
 # Set line styling for line plots
 lines.linewidth: 2.0            # line width in points
@@ -53,9 +53,9 @@ figure.figsize: 40, 12          # figure size in inches
 figure.dpi: 50                 # figure dots per inch
 
 # Setting font sizes and spacing
-axes.labelsize: 32              # font size of the x and y labels
-xtick.labelsize: 24             # font size of the x tick labels      
-ytick.labelsize: 24             # font size of the y tick labels
+axes.labelsize: 42              # font size of the x and y labels
+xtick.labelsize: 32             # font size of the x tick labels      
+ytick.labelsize: 32             # font size of the y tick labels
 font.size: 18                   # default font size for text, given in points.
 xtick.major.pad: 8              # distance to major tick label in points  
 ytick.major.pad: 12
@@ -72,4 +72,3 @@ ytick.minor.size: 0
 
 legend.edgecolor: 000000
 legend.labelcolor: 000000
-legend.framealpha: 0.7
