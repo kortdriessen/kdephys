@@ -5,6 +5,8 @@ from scipy.ndimage import gaussian_filter1d, gaussian_filter
 import scipy.signal as signal
 import numpy as np
 import pandas as pd
+import zarr
+import dask
 
 
 # Misc utils for dealing with xarray structures:
@@ -231,3 +233,43 @@ def rel_by_store_median(ds, state="NREM", t1=None, t2=None):
     else:
         print("no stores found")
         return None
+
+
+def _get_increasing_segments_mask(times):
+    keep = np.ones((len(times),), dtype=bool)
+    gap_ixs = np.where(np.diff(times) < 0)[0]
+    for gap_ix in gap_ixs:
+        pre_gap_values = times[gap_ix]
+        next_ix = np.where(times[gap_ix:] > pre_gap_values)[0][0]
+        keep[gap_ix+1:gap_ix+next_ix] = False
+    return keep
+
+def _hotfix_times(da):
+    keep = _get_increasing_segments_mask(da.time.data)
+    return da.sel(time=keep).copy()
+
+def load_processed_zarr_as_xarray(fpath):
+    """Load SI-saved zarr as dask-based xarray for OFF detection.
+    
+    NB: Non monotonously increasing timestamps are dismissed."""
+
+    zg = zarr.open(fpath)
+    print('zarr opened')
+    da = xr.DataArray(
+        data=dask.array.from_zarr(zg.traces_seg0).rechunk(),
+        dims=("time", "channel"),
+        attrs = {
+            "units": "AU",
+            "fs": zg.attrs["sampling_frequency"],
+        },
+        name="processed_mua",
+    )
+    print('da created')
+    duration = da.time.shape[0] / zg.attrs["sampling_frequency"]
+    times = np.linspace(0, duration, da.time.shape[0])
+    channels = np.arange(1, 17)
+    da = da.assign_coords({'time':times, 'channel':channels})
+    #print('hotfixing times')
+    #da = _hotfix_times(da)
+
+    return da
