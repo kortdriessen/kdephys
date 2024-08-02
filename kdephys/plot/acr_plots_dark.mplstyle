@@ -30,14 +30,15 @@ axes.grid: True                 # display grid or not
 axes.grid.axis: y               # which axis the grid should apply to          
 grid.linewidth: 1               # in points
 grid.color: DADADA              # grid color
+grid.alpha: 0.4
 grid.linestyle: dashed
 axes.axisbelow: True            # Sets axis gridlines below lines and patches.
 
 # Style spines
-axes.linewidth: 3                # Spine edge line width
-axes.spines.top: False          # Display axis spines (True or False)
+axes.linewidth: 2                # Spine edge line width
+axes.spines.top: True          # Display axis spines (True or False)
 axes.spines.left: True          # We only want the left and bottom spines
-axes.spines.right: False
+axes.spines.right: True
 axes.spines.bottom: True
 
 # Set line styling for line plots
@@ -55,7 +56,7 @@ figure.dpi: 50                 # figure dots per inch
 # Setting font sizes and spacing
 axes.labelsize: 18              # font size of the x and y labels
 xtick.labelsize: 14             # font size of the x tick labels      
-ytick.labelsize: 28             # font size of the y tick labels
+ytick.labelsize: 24             # font size of the y tick labels
 font.size: 18                   # default font size for text, given in points.
 xtick.major.pad: 8              # distance to major tick label in points  
 ytick.major.pad: 12
@@ -64,7 +65,7 @@ ytick.color: FFFFFF
 ytick.labelcolor: CFCFCF
 
 # Remove major and minor ticks except for on the x-axis.
-xtick.major.size: 8             # major tick size in points
+xtick.major.size: 0             # major tick size in points
 xtick.minor.size: 0             # minor tick size in points
 ytick.major.size: 0
 ytick.minor.size: 0
