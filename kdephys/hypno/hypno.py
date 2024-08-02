@@ -2,6 +2,7 @@ import pandas as pd
 import yaml
 from pathlib import Path
 from kdephys.hypno.ecephys_hypnogram import Hypnogram, DatetimeHypnogram
+import numpy as np
 
 def _infer_bout_start(df, bout):
     """Infer a bout's start time from the previous bout's end time.
@@ -119,6 +120,34 @@ def keep_states(dat, hypnogram, states):
     keep = hypnogram.keep_states(states).covers_time(dat.datetime)
     return dat.sel(datetime=keep)
 
+def trim_hypnogram(df: pd.DataFrame, start, end) -> pd.DataFrame:
+    """Trim a hypnogram to start and end within a specified time range.
+    Actually will truncate bouts if they extend beyond the range."""
+    if not {"state", "start_time", "end_time", "duration"}.issubset(df):
+        raise AttributeError(
+            "Required columns `state`, `start_time`, `end_time`, and `duration` are not present."
+        )
+    if not all(df["start_time"] <= df["end_time"]):
+        raise ValueError("Not all start times precede end times.")
+    if start > end:
+        raise ValueError("Invalid value for kwargs: expected `start` <= `end`")
+
+    df = df.copy()
+    starts_before = df["start_time"] < start
+    df.loc[starts_before, "start_time"] = start
+    ends_after = df["end_time"] > end
+    df.loc[ends_after, "end_time"] = end
+    starts_after = df["start_time"] >= df["end_time"]
+    df = df[~starts_after]
+    df["duration"] = df["end_time"] - df["start_time"]
+
+    zero = np.array([0], dtype=df["duration"].dtype)[
+        0
+    ]  # Represents duration of length 0, regardless of dtype
+    assert all(df["duration"] > zero)
+    assert all(df["start_time"] >= start)
+    assert all(df["end_time"] <= end)
+    return df.reset_index(drop=True)
 
 def keep_hypnogram_contents(dat, hypnogram):
     """Select only timepoints covered by the hypnogram.
