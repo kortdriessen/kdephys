@@ -117,8 +117,33 @@ def decimate(sig, q=5):
     rs.attrs["fs"] = sig.fs / q
     return rs
 
+def rel_by_store(ds, state="NREM", t1=None, t2=None, method='mean'):
+    """split a dataset by its stores, then get each store relative to a 
+    baseline recording (specified by t1 and t2), filtered by state.
+    
+    - Relies on 'state' coordinate being up to date for best results.
 
-def rel_by_store(ds, state="NREM", t1=None, t2=None):
+    Parameters
+    ----------
+    ds : xr.Dataset
+        Dataset containing both stores and the baseline data.
+    state : str, optional
+        state in which to compute the baseline value, by default "NREM"
+    t1 : pd.Timestamp, optional
+        start time of baseline. If not specified, 9am on the day of the first timestamp will be used, by default None
+    t2 : pd.Timestamp, optional
+        end time of baseline. If not specified, 9pm on the day of the first timestamp will be used, by default None
+    method : str, optional
+        whether to reference to the baseline mean or median, by default 'mean'
+    """
+    if method == 'mean':
+        return rel_by_store_mean(ds, state=state, t1=t1, t2=t2)
+    elif method == 'median':
+        return rel_by_store_median(ds, state=state, t1=t1, t2=t2)
+    else:
+        raise ValueError(f"method parameter '{method}' not recognized, must use 'mean' or 'median'")
+
+def rel_by_store_mean(ds, state="NREM", t1=None, t2=None):
     """split a dataset by its stores, then get each store relative to a baseline recording (specified by t1 and t2), filtered by state.
     Relies on 'state' coordinate being up to date for best results.
 
