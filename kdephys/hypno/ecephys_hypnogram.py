@@ -524,7 +524,7 @@ class DatetimeHypnogram(Hypnogram):
 # Misc. module functions
 #####
 
-def trim_hypnogram(df: pd.DataFrame, start, end) -> pd.DataFrame:
+def trim_hypnogram(df: pd.DataFrame, start, end, ret_hyp=False):
     """Trim a hypnogram to start and end within a specified time range.
     Actually will truncate bouts if they extend beyond the range."""
     if not {"state", "start_time", "end_time", "duration"}.issubset(df):
@@ -551,7 +551,10 @@ def trim_hypnogram(df: pd.DataFrame, start, end) -> pd.DataFrame:
     assert all(df["duration"] > zero)
     assert all(df["start_time"] >= start)
     assert all(df["end_time"] <= end)
-    return df.reset_index(drop=True)
+    if ret_hyp:
+        return DatetimeHypnogram(df.reset_index(drop=True))
+    else:
+        return df.reset_index(drop=True)
 
 def _infer_bout_start(df, bout):
     """Infer a bout's start time from the previous bout's end time.
