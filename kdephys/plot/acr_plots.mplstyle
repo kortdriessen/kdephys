@@ -6,6 +6,7 @@ legend.loc: lower right
 
 # Set custom colors. All colors are in web style hex format.
 axes.prop_cycle: cycler('color', ['363636', '3f5cfc', 'FD864A'])
+#axes.prop_cycle: cycler('color', ['822175', '822175', '822175', '822175', '311CB8', '311CB8', '311CB8', '311CB8', '0AA12F', '0AA12F', '0AA12F', '0AA12F', 'A1530A', 'A1530A', 'A1530A', 'A1530A'])
 
 # Main Figure Properties
 figure.facecolor: e3ceb9
@@ -27,11 +28,12 @@ axes.titleweight: normal          # font weight of title
 
 # Grid Properties
 axes.grid: True                 # display grid or not
-axes.grid.axis: y               # which axis the grid should apply to          
+axes.grid.axis: both               # which axis the grid should apply to          
 grid.linewidth: 1               # in points
 grid.color: A7A7A7              # grid color
 grid.linestyle: dashed
 axes.axisbelow: True            # Sets axis gridlines below lines and patches.
+
 
 # Style spines
 axes.linewidth: 3                # Spine edge line width
@@ -64,7 +66,7 @@ ytick.color: 000000
 ytick.labelcolor: 000000
 
 # Remove major and minor ticks except for on the x-axis.
-xtick.major.size: 0             # major tick size in points
+xtick.major.size: 2             # major tick size in points
 xtick.minor.size: 0             # minor tick size in points
 ytick.major.size: 0
 ytick.major.width: 0

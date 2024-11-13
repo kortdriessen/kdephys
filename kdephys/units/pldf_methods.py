@@ -45,6 +45,17 @@ def bout_duration_similarity_check(df, col="bout_duration"):
 def ch(self, chan: int):
     return self.filter(pl.col("channel") == chan)
 
+@uf.register_pldf_method
+def xch(self, chan: int):
+    return self.filter(pl.col("channel") != chan)
+
+@uf.register_pldf_method
+def chnl(self, chan: int):
+    return self.filter(pl.col("channel") == chan)
+
+@uf.register_pldf_method
+def sg(self, sg: str):
+    return self.filter(pl.col("sub_group") == sg)
 
 @uf.register_pldf_method
 def st(self, state: str):
@@ -60,6 +71,9 @@ def cid(self, cid: int):
 def cid_un(self):
     return self["cluster_id"].unique()
 
+@uf.register_pldf_method
+def chunq(self):
+    return self["channel"].unique()
 
 @uf.register_pldf_method
 def rec(self, rec):
@@ -71,13 +85,20 @@ def rec(self, rec):
 
 @uf.register_pldf_method
 def prb(self, probe_store: str):
-    return self.filter(pl.col("probe") == probe_store)
+    col = 'probe' if 'probe' in self.columns else 'store'
+    return self.filter(pl.col(col) == probe_store)
 
 
 @uf.register_pldf_method
 def pclus(self, probe_store: str, cluster_id: int):
     return self.filter(
         (pl.col("probe") == probe_store) & (pl.col("cluster_id") == cluster_id)
+    )
+
+@uf.register_pldf_method
+def pchan(self, probe_store: str, channel: int):
+    return self.filter(
+        (pl.col("probe") == probe_store) & (pl.col("channel") == channel)
     )
 
 
@@ -231,3 +252,8 @@ def cltz(self):
 def cl(self, col: str):
     """Clear any Column"""
     return self.with_columns(pl.lit(None).alias(col))
+
+@uf.register_pldf_method
+def cdn(self, cond: str):
+    """filter on the condition column"""
+    return self.filter(pl.col('condition')==cond)

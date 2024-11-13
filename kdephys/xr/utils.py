@@ -273,27 +273,38 @@ def _hotfix_times(da):
     keep = _get_increasing_segments_mask(da.time.data)
     return da.sel(time=keep).copy()
 
-def load_processed_zarr_as_xarray(fpath):
+def load_raw_processed_zarr(path):
+    zg = zarr.open(path)
+    return zg
+
+def load_processed_zarr_as_xarray(fpath, times=False):
     """Load SI-saved zarr as dask-based xarray for OFF detection.
     
     NB: Non monotonously increasing timestamps are dismissed."""
 
     zg = zarr.open(fpath)
     print('zarr opened')
+    times = zg.times_seg0 if times else np.linspace(0, zg.traces_seg0.shape[0] / zg.attrs["sampling_frequency"], zg.traces_seg0.shape[0])
     da = xr.DataArray(
         data=dask.array.from_zarr(zg.traces_seg0).rechunk(),
         dims=("time", "channel"),
+        coords={"time": times, "channel": np.arange(1, 17)},
         attrs = {
-            "units": "AU",
+            "units": "mV",
             "fs": zg.attrs["sampling_frequency"],
         },
         name="processed_mua",
     )
     print('da created')
-    duration = da.time.shape[0] / zg.attrs["sampling_frequency"]
-    times = np.linspace(0, duration, da.time.shape[0])
-    channels = np.arange(1, 17)
-    da = da.assign_coords({'time':times, 'channel':channels})
+    #if times:
+    #    times = zg.times_seg0
+    #else:
+    #    duration = zg.traces_seg0.shape[0] / zg.attrs["sampling_frequency"]
+    #    times = np.linspace(0, duration, da.time.shape[0]) 
+#
+    #channels = np.arange(1, 17)
+    #da = da.assign_coords({'time':times, 'channel':channels})
+    
     #print('hotfixing times')
     #da = _hotfix_times(da)
 

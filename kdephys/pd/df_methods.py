@@ -20,6 +20,14 @@ def rec(self, rec):
     return self.loc[self.recording == rec]
 
 @pf.register_dataframe_method
+def sg(self, sg):
+    return self.loc[self['sub_group'] == sg]
+
+@pf.register_dataframe_method
+def cnd(self, cond):
+    return self.loc[self.condition == cond]
+
+@pf.register_dataframe_method
 def sbj(self, subject):
     return self.loc[self.subject == subject]
 
@@ -193,6 +201,9 @@ def offs(self):
 def ons(self):
     return self.loc[self.status == "on"]
 
+@pf.register_dataframe_method
+def mindur(self, min_dur):
+    return self.loc[self.duration >= min_dur]
 
 @pf.register_dataframe_method
 def tz(self, time_zone):
@@ -201,3 +212,11 @@ def tz(self, time_zone):
 @pf.register_dataframe_method
 def dsc(self, descriptor):
     return self.loc[self['descriptor'] == descriptor]
+
+@pf.register_dataframe_method
+def cdn(self, cond):
+    return self.loc[self['condition'] == cond]
+
+@pf.register_dataframe_method
+def bnd(self, band):
+    return self.loc[self['Band'] == band] if 'Band' in self.columns else self.loc[self['band'] == band]

@@ -5,7 +5,7 @@ path.simplify_threshold: 0.99
 legend.loc: lower right
 
 # Set custom colors. All colors are in web style hex format.
-axes.prop_cycle: cycler('color', ['363636', '3f5cfc', 'FD864A'])
+axes.prop_cycle: cycler('color', ['512182', '0a49a1', '0aa12f'. 'a1530a'])
 
 # Main Figure Properties
 figure.facecolor: FFFFFF

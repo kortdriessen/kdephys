@@ -3,6 +3,7 @@ import kdephys.xr as kx
 import pandas as pd
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 @pf.register_xarray_dataarray_method
@@ -108,3 +109,14 @@ def light_schedule(self):
             time = times[-1] + pd.Timedelta("12h")
             times.append(time)
     return times
+
+@pf.register_xarray_dataarray_method
+def plot_mask(self, plt_kwargs={}):
+    f, ax = plt.subplots(figsize=(35, 10))
+    self.plot.imshow(ax=ax, x='time', y='channel', vmin=0.4, vmax=1.3, cmap='viridis', **plt_kwargs)
+    return f, ax
+
+@pf.register_xarray_dataarray_method
+def overlay_mask(self, ax, plt_kwargs={}):
+    self.plot.imshow(ax=ax, x='time', y='channel', vmin=0.3, vmax=1.3, cmap='viridis', alpha=0.4, **plt_kwargs)
+    return ax

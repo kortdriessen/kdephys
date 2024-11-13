@@ -83,6 +83,25 @@ def smooth(df, col, sigma=12):
     df[col] = smoothed_data
     return df
 
+def add_quantile_column(df, column, num_quantiles=10, separate_by=None):
+    
+    if separate_by is not None:
+        df['quantile'] = 0
+        for sep_val in df[separate_by].unique():
+            df_sep = df[df[separate_by] == sep_val]
+            labels = [str(i+1) for i in range(num_quantiles)]
+            if len(df_sep) < num_quantiles+1:
+                continue
+            qs = pd.qcut(df_sep[column], num_quantiles, labels=labels,  duplicates='drop').to_frame()
+            quants = qs[column].values.astype(int)
+            df.loc[df[separate_by] == sep_val, "quantile"] = quants
+        return df
+    labels = [str(i+1) for i in range(num_quantiles)]
+    qs = pd.qcut(df[column], num_quantiles, labels=labels).to_frame()
+    quants = qs[column].values.astype(int)
+    df["quantile"] = quants
+    return df
+
 
 ## INCOMPLETE -----------------------------------------------------------------------------------------------------------
 

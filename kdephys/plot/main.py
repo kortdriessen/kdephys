@@ -38,7 +38,7 @@ def quick_histo(data):
     return ax
 
 
-def shade_hypno_for_me(hypnogram, ax=None, xlim=None, alpha=0.15):
+def shade_hypno_for_me(hypnogram, ax=None, xlim=None, ymin=0, ymax=1, alpha=0.15):
     """Shade plot background using hypnogram state.
 
     Parameters
@@ -56,6 +56,8 @@ def shade_hypno_for_me(hypnogram, ax=None, xlim=None, alpha=0.15):
         ax.axvspan(
             bout.start_time,
             bout.end_time,
+            ymin=ymin,
+            ymax=ymax,
             alpha=alpha,
             color=hypno_colors[bout.state],
             zorder=1000,
@@ -65,6 +67,10 @@ def shade_hypno_for_me(hypnogram, ax=None, xlim=None, alpha=0.15):
     ax.set_xlim(xlim)
     return ax
 
+def _add_hspan(ax, xmin, xmax, lower=0.8, upper=0.9):
+    ylim = ax.get_ylim()
+    ax.axvspan(xmin, xmax, ymin=lower, ymax=upper, color='blue')
+    return ax
 
 def add_light_schedule(times, ax=None, xlim=None):
     """add a bar to indicate light/dark periods at the top of an axes.
@@ -317,3 +323,86 @@ def quick_bp_channel_plot(bp, band="delta"):
             f, ax = plt.subplots()
             bp[band].sel(store=store, channel=chan).plot(ax=ax)
     return
+
+
+def _plot_overlapped_fp(data, df_map=None, pal=None, shade_df=None, hspace=-0.5, height=3, aspect=12):
+    plt.rcParams['axes.spines.bottom'] = False
+    plt.rcParams['axes.spines.left'] = False
+    plt.rcParams['axes.spines.right'] = False
+    plt.rcParams['axes.spines.top'] = False
+    plt.rcParams['axes.grid'] = False
+    plt.rcParams['xtick.major.size'] = 0
+    plt.rcParams['figure.facecolor'] = 'white'
+    plt.rcParams['axes.facecolor'] = 'None'
+    if pal is None:
+        pal = sns.cubehelix_palette(16, rot=-.25, light=.7)
+    xname = 'time' if 'time' in data.columns else 't'
+    if xname not in data.columns:
+        xname = 'datetime'
+    yname = 'data' if 'data' in data.columns else 'd'
+    assert xname in data.columns, f"xname {xname} not in data"
+    assert yname in data.columns, f"yname {yname} not in data"
+    if 'condition' in data.columns:
+        g = sns.relplot(data=data, clip_on=False, x=xname, y=yname, hue='condition', palette=pal, row='channel', kind='line', linewidth=3, aspect=aspect, height=height)
+    else:
+        g = sns.relplot(data=data, clip_on=False, x=xname, y=yname, palette=pal, hue='channel', row='channel', kind='line', linewidth=3, aspect=aspect, height=height)
+    g.figure.subplots_adjust(hspace=hspace)
+
+
+    if shade_df is not None:
+        for channel in shade_df.channel.unique():
+            shade_df_chan = shade_df.loc[shade_df.channel == channel]
+            for row in shade_df_chan.itertuples():
+                g.axes[channel-1, 0].axvspan(row.start_datetime, row.end_datetime, color='red', alpha=0.3)
+    g.set_titles("")
+    g.set(yticks=[], ylabel="")
+    g.despine(bottom=True, left=True);
+    return g
+
+def plot_overlapped_fp(data, df_map=None, pal=None, shade_df=None, hspace=-0.5, height=3, aspect=12):
+    plt.rcParams['axes.spines.bottom'] = False
+    plt.rcParams['axes.spines.left'] = False
+    plt.rcParams['axes.spines.right'] = False
+    plt.rcParams['axes.spines.top'] = False
+    plt.rcParams['axes.grid'] = False
+    plt.rcParams['xtick.major.size'] = 0
+    plt.rcParams['figure.facecolor'] = 'white'
+    plt.rcParams['axes.facecolor'] = 'None'
+    
+    if pal is None:
+        pal = sns.cubehelix_palette(16, rot=-.25, light=.7)
+        
+    xname = 'time' if 'time' in data.columns else 't'
+    if xname not in data.columns:
+        xname = 'datetime'
+    yname = 'data' if 'data' in data.columns else 'd'
+    
+    assert xname in data.columns, f"xname {xname} not in data"
+    assert yname in data.columns, f"yname {yname} not in data"
+
+    if 'condition' in data.columns:
+        g = sns.relplot(data=data, clip_on=False, x=xname, y=yname, hue='condition', 
+                       palette=pal, row='channel', kind='line', linewidth=3, 
+                       aspect=aspect, height=height)
+    else:
+        # Create base FacetGrid
+        g = sns.FacetGrid(data=data, row='channel', aspect=aspect, height=height)
+        # Add lineplot layer
+        g.map(sns.lineplot, data=data, x=xname, y=yname, linewidth=3)
+        # Add scatterplot layer if df_map is provided
+        if df_map is not None:
+            g.map(sns.scatterplot, data=df_map, x='datetime', y='plot_val', hue='channel')
+
+    g.figure.subplots_adjust(hspace=hspace)
+
+    if shade_df is not None:
+        for channel in shade_df.channel.unique():
+            shade_df_chan = shade_df.loc[shade_df.channel == channel]
+            for row in shade_df_chan.itertuples():
+                g.axes[channel-1, 0].axvspan(row.start_datetime, row.end_datetime, 
+                                           color='red', alpha=0.3)
+                
+    g.set_titles("")
+    g.set(yticks=[], ylabel="")
+    g.despine(bottom=True, left=True)
+    return g

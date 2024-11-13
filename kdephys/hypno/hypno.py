@@ -67,7 +67,7 @@ def add_states(dat, hypnogram):
     return dat.assign_coords(state=("datetime", states))
 
 
-def get_states(hyp, times):
+def get_states(hyp, times, code=False):
     """Given a hypnogram and an array of times, label each time with its state.
     Parameters:
     -----------
@@ -79,11 +79,17 @@ def get_states(hyp, times):
     states (n_times,)
         The state label for each sample in `times`.
     """
-    labels = pd.Series(["no_state"] * len(times))
+    
+    if code:
+        labels = pd.Series([0] * len(times))
+    else:
+        labels = pd.Series(["no_state"] * len(times))
     for bout in hyp.itertuples():
         times_in_bout = (times >= bout.start_time) & (times <= bout.end_time)
-        labels.values[times_in_bout] = bout.state
-
+        if code:
+            labels.values[times_in_bout] = bout.state_code
+        else:
+            labels.values[times_in_bout] = bout.state
     return labels
 
 
