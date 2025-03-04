@@ -67,6 +67,37 @@ def add_states(dat, hypnogram):
     return dat.assign_coords(state=("datetime", states))
 
 
+def get_states_fast(hyp, times, code=False):
+    """Given a hypnogram and an array of times, label each time with its state.
+    Parameters:
+    -----------
+    times: (n_times,)
+        The times to label.
+    hyp: DatetimeHypnogram
+    Returns:
+    --------
+    states (n_times,)
+        The state label for each sample in `times`.
+    """
+    # Initialize with default values
+    default_value = 0 if code else "no_state"
+    labels = np.full(len(times), default_value, dtype=object if not code else int)
+    
+    # Convert times to numpy array if it's not already
+    times_array = np.asarray(times)
+    
+    # Sort hypnogram by start_time for more efficient processing
+    sorted_hyp = hyp.sort_values('start_time')
+    
+    # Use numpy operations for faster computation
+    for bout in sorted_hyp.itertuples():
+        # Vectorized comparison
+        mask = (times_array >= bout.start_time) & (times_array <= bout.end_time)
+        if mask.any():  # Only process if there are matching times
+            labels[mask] = bout.state_code if code else bout.state
+    
+    return pd.Series(labels, index=getattr(times, 'index', None))
+
 def get_states(hyp, times, code=False):
     """Given a hypnogram and an array of times, label each time with its state.
     Parameters:

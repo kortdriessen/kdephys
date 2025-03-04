@@ -309,3 +309,6 @@ def load_processed_zarr_as_xarray(fpath, times=False):
     #da = _hotfix_times(da)
 
     return da
+
+def xr_from_zarr_store(fpath, times=False):
+    return
