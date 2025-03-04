@@ -53,7 +53,7 @@ axes.labelsize: 34              # font size of the x and y labels
 
 # ---------------------- All tick settings ----------------------
 
-xtick.bottom: False              # Ensure bottom x-ticks are visible
+xtick.bottom: True              # Ensure bottom x-ticks are visible
 xtick.top: False                # Ensure top x-ticks are not visible
 ytick.left: True                # Ensure left y-ticks are visible
 ytick.right: False              # Ensure right y-ticks are not visible
@@ -65,8 +65,8 @@ ytick.color: 000000             # Color of y-tick lines (black)
 
 xtick.major.size: 8             # major tick size in points
 ytick.major.size: 8
-xtick.minor.size: 3.5             # minor tick size in points
-ytick.minor.size: 3.5
+xtick.minor.size: 5             # minor tick size in points
+ytick.minor.size: 5
 
 # ---------------------- All tick label settings ----------------------
 xtick.labelbottom: False
@@ -84,5 +84,5 @@ axes.linewidth: 2.5             # Spine edge line width
 xtick.major.width: 2.5          # Thickness of major x-tick lines
 ytick.major.width: 2.5          # Thickness of major y-tick lines
 
-xtick.minor.width: 1.5          # Thickness of minor x-tick lines
-ytick.minor.width: 1.5          # Thickness of minor y-tick lines
+xtick.minor.width: 2          # Thickness of minor x-tick lines
+ytick.minor.width: 2          # Thickness of minor y-tick lines
