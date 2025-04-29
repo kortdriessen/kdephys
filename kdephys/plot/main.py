@@ -406,3 +406,138 @@ def plot_overlapped_fp(data, df_map=None, pal=None, shade_df=None, hspace=-0.5, 
     g.set(yticks=[], ylabel="")
     g.despine(bottom=True, left=True)
     return g
+
+def plot_basic_hypnogram(h, size=(20, 1), xlim=None, style_path=None, single_tone=False):
+    
+    state_colors = {}
+    if single_tone:
+        # GRAY SCALE
+        state_colors['Wake'] = (1, "#333333")
+        state_colors['NREM'] = (2, "#4f4f4f")
+        state_colors['REM'] = (3, "#797979")
+        
+        # REDS
+        state_colors['Wake'] = (1, "#6E2032")
+        state_colors['NREM'] = (2, "#983F3F")
+        state_colors['REM'] = (3, "#C88E87")
+    
+    else:
+        state_colors['NREM'] = (2, "#4b71e3")
+        state_colors['REM'] = (3, '#e34bde')
+        state_colors['Wake'] = (1, '#4be350')
+    
+    plt.rcdefaults()
+    if style_path is not None:
+        plt.style.use(style_path)
+    plt.rcParams['axes.spines.left'] = False
+    plt.rcParams['axes.spines.bottom'] = False
+    plt.rcParams['axes.spines.right'] = False
+    plt.rcParams['axes.spines.top'] = False
+    plt.rcParams['xtick.bottom'] = False
+    f, ax = plt.subplots(figsize=size)
+    ax.set_ylim(0, 3)
+    if xlim is not None:
+        ax.set_xlim(xlim)
+    else:
+        ax.set_xlim(h.start_time.min(), h.end_time.max())
+    
+    # Add small epsilon to avoid exact overlap
+    epsilon = pd.Timedelta(milliseconds=1)
+
+    for i, bout in enumerate(h.itertuples()):
+        if bout.state in state_colors.keys():
+            value, color = state_colors[bout.state]
+        else:
+            value, color = state_colors['Wake']
+        
+        y_range = (value-1, value)
+        y_range = (y_range[0]/3, y_range[1]/3)
+        
+        # Adjust end time of previous bout if there's an overlap
+        start_time = bout.start_time
+        end_time = bout.end_time
+        
+        # Ensure no overlap with previous bout
+        if i > 0 and start_time <= h.iloc[i-1].end_time:
+            # Set start time to just after previous bout's end time
+            start_time = h.iloc[i-1].end_time + epsilon
+        
+        ax.axvspan(start_time, end_time, ymin=y_range[0], ymax=y_range[1], 
+                color=color, alpha=1, linewidth=0)
+
+    ax.set_yticks([])
+
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    return f, ax
+
+def base_raster(data, xname='datetime', yname='negchan', pal=None, hspace=-0.5, color='blue', figsize=(24, 8)):
+    plt.rcParams['axes.spines.bottom'] = False
+    plt.rcParams['axes.spines.left'] = False
+    plt.rcParams['axes.spines.right'] = False
+    plt.rcParams['axes.spines.top'] = False
+    plt.rcParams['axes.grid'] = False
+    plt.rcParams['xtick.major.size'] = 0
+    plt.rcParams['figure.facecolor'] = 'white'
+    plt.rcParams['axes.facecolor'] = 'None'
+    
+    assert xname in data.columns, f"xname {xname} not in data"
+    assert yname in data.columns, f"yname {yname} not in data"
+
+    f, ax = plt.subplots(figsize=figsize)
+    ax = sns.scatterplot(data, x=xname, y=yname, linewidth=0, alpha=0.7, s=60, ax=ax, color=color)
+    ax.set_yticks([])
+    ax.set_xticks([])
+    plt.tight_layout()
+    return f, ax
+    
+def base_trace_plot(data, xname='datetime', yname='data', color='blue', hspace=-0.5, height=3,  aspect=12):
+    plt.rcParams['axes.spines.bottom'] = False
+    plt.rcParams['axes.spines.left'] = False
+    plt.rcParams['axes.spines.right'] = False
+    plt.rcParams['axes.spines.top'] = False
+    plt.rcParams['axes.grid'] = False
+    plt.rcParams['xtick.major.size'] = 0
+    plt.rcParams['figure.facecolor'] = 'white'
+    plt.rcParams['axes.facecolor'] = 'None'     
+        
+    assert xname in data.columns, f"xname {xname} not in data"
+    assert yname in data.columns, f"yname {yname} not in data"
+
+    # Create line relplot
+    g = sns.relplot(data, x=xname, y=yname, row='channel', linewidth=3, aspect=aspect, height=height, color=color, kind='line')
+
+    g.figure.subplots_adjust(hspace=hspace)         
+    g.set_titles("")
+    g.set(yticks=[], ylabel="")
+    g.despine(bottom=True, left=True)
+    return g
+
+def quick_trace_plot(data, times, stim_starts, stim_ends, color='blue', hspace=-0.6, figsize=(28, 10)):
+    """Quick plot of raw data with stimulations
+
+    Parameters
+    ----------
+    data : np.ndarray
+        Raw data to plot, of shape (n_channels, n_samples)
+    times : np.ndarray
+        Times of the data, of shape (n_samples,)
+    stim_starts : np.ndarray
+        Start times of stimulations
+    stim_ends : np.ndarray
+        End times of stimulations
+    color : str, optional
+        Color of the traces, by default SOM_BLUE
+    hspace : float, optional
+        Space between traces, by default -0.6
+    figsize : tuple, optional
+        Size of the figure, by default (28, 10)
+    """
+    f, ax = plt.subplots(data.shape[0], 1, figsize=figsize)
+    for i in range(data.shape[0]):
+        ax[i].plot(times, data[i, :], color=color)
+    plt.subplots_adjust(hspace=hspace)
+    for on, off in zip(stim_starts, stim_ends):
+        for a in ax:
+            a.set_xlim(times[0], times[-1])
+            a.axvspan(on, off, color='cornflowerblue', ymin=0.325, ymax=0.712, alpha=0.5)
+    return f, ax
