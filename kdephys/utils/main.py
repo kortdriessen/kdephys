@@ -1,6 +1,8 @@
 import pandas as pd
 import math
 
+def td(amount, unit='s'):
+    return pd.Timedelta(f"{amount}{unit}")
 
 def prev_day(t):
     return t - pd.Timedelta("1D")
