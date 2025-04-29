@@ -120,3 +120,10 @@ def plot_mask(self, plt_kwargs={}):
 def overlay_mask(self, ax, plt_kwargs={}):
     self.plot.imshow(ax=ax, x='time', y='channel', vmin=0.3, vmax=1.3, cmap='viridis', alpha=0.4, **plt_kwargs)
     return ax
+
+@pf.register_xarray_dataarray_method
+def panda(self, name='data', drop=['time', 'timedelta', 'recording']):
+    pddf = self.to_dataframe(name=name)
+    pddf = pddf.reset_index()
+    pddf = pddf.drop(columns=drop)
+    return pddf
