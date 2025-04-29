@@ -53,7 +53,7 @@ axes.labelsize: 34              # font size of the x and y labels
 
 # ---------------------- All tick settings ----------------------
 
-xtick.bottom: True              # Ensure bottom x-ticks are visible
+xtick.bottom: False              # Ensure bottom x-ticks are visible
 xtick.top: False                # Ensure top x-ticks are not visible
 ytick.left: True                # Ensure left y-ticks are visible
 ytick.right: False              # Ensure right y-ticks are not visible
