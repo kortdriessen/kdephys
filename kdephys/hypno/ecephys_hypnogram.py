@@ -202,7 +202,7 @@ class FloatHypnogram(Hypnogram):
         return self.__class__(self.loc[self.duration > duration])
 
     @classmethod
-    def get_dummy(cls, start_time=0.0, end_time=np.Inf):
+    def get_dummy(cls, start_time=0.0, end_time=np.inf):
         """Return an empty, unscored hypnogram.
 
         Parameters
