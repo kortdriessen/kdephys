@@ -14,7 +14,6 @@ bands = sp.bands
 def xnote(self, notes=["noisy", "bw"]):
     return self.loc[~self.note.str.contains("|".join(notes))]
 
-
 @pf.register_dataframe_method
 def rec(self, rec):
     return self.loc[self.recording == rec]

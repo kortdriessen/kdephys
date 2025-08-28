@@ -215,7 +215,7 @@ def oots(self, t1, t2):
         t2 (str, datetime64, int): time to end slicing
     """
     return self.filter(
-        (pl.col("start_datetime") >= t1) & (pl.col("start_datetime") <= t2)
+        (pl.col("start_datetime") >= t1) & (pl.col("end_datetime") <= t2)
     )
 
 
@@ -257,3 +257,29 @@ def cl(self, col: str):
 def cdn(self, cond: str):
     """filter on the condition column"""
     return self.filter(pl.col('condition')==cond)
+
+@uf.register_pldf_method
+def xt(self, xtype: str):
+    """filter on the xtype column"""
+    return self.filter(pl.col('xtype')==xtype)
+
+
+@uf.register_pldf_method
+def frac_sleep(self):
+    """calculate the fraction of the dataframe where the state column is 'sleep'"""
+    return self.filter(pl.col('state')=='sleep').shape[0] / self.shape[0]
+
+@uf.register_pldf_method
+def pctl(self, col, pctl):
+    """calculate any given percentile of a column"""
+    return self.select(pl.col(col).quantile(pctl)).to_series().to_numpy()[0]
+
+@uf.register_pldf_method
+def pfilt(self, col, pctl, type='gt'):
+    """filter on a column based on a percentile"""
+    if type == 'gt':
+        return self.filter(pl.col(col) > self.pctl(col, pctl))
+    elif type == 'lt':
+        return self.filter(pl.col(col) < self.pctl(col, pctl))
+    else:
+        raise ValueError(f"type must be 'gt' or 'lt', not {type}")

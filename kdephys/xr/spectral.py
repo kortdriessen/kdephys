@@ -523,3 +523,89 @@ def get_muscle_energy(m, window_length=8, overlap=1):
         energies = np.append(energies, energy_of_chunk)
 
     return energies
+
+
+#
+# MULTITAPER SPECTROGRAM
+# -----------------------
+#
+
+from concurrent.futures import ProcessPoolExecutor
+import concurrent.futures
+import numpy as np
+import multiprocessing
+from scipy.signal import spectrogram
+
+# Define the channel processing function outside
+def _mt_single_channel(args):
+    channel, data, fs, nperseg, noverlap, NW = args
+    d = data  # Extract numpy array for better performance
+    ff, tt, sxx = spectrogram(d, fs=fs, nperseg=nperseg, noverlap=noverlap, window=('dpss', NW))
+    return channel, ff, tt, sxx
+
+def compute_multitaper_spectrogram(data, seg_length=2, overlap=1, NW=4):
+    fs = data.fs
+    nperseg = int(seg_length*fs)
+    noverlap = int(overlap*fs)
+    
+    # Determine reasonable number of workers based on system
+    max_workers = min(multiprocessing.cpu_count(), len(data.channel))
+    
+    # Process channels in parallel
+    results = {}
+    ff, tt = None, None
+    
+    # Create argument tuples for each channel
+    args_list = [(ch, data.sel(channel=ch).values, fs, nperseg, noverlap, NW) for ch in data.channel.values]
+    
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        for channel, freq, time, spec in executor.map(_mt_single_channel, args_list):
+            results[channel] = spec
+            
+            # Store frequency and time axes (same for all channels)
+            if ff is None:
+                ff = freq
+                tt = time
+    
+    # Create organized output
+    # Option 1: Dictionary with channel names as keys
+    output = {
+        'frequencies': ff,
+        'times': tt,
+        'spectrograms': results
+    }
+
+# Option 2: Convert to xarray Dataset if xarray is available
+    try:
+        import xarray as xr
+        
+        # Create a new dataarray with the results
+        da = xr.DataArray(
+            data=np.array([results[ch] for ch in data.channel.values]),
+            dims=['channel', 'frequency', 'time'],
+            coords={
+                'channel': data.channel.values,
+                'frequency': ff,
+                'time': tt
+            }
+        )
+        return da
+    except (ImportError, NameError):
+        # If xarray not available, return dictionary
+        return output
+
+
+import acr #TODO: URGENT, fix this!! 
+
+def add_datetime_to_spg(spg, subject, rec):
+    rec_start = pd.Timestamp(acr.info_pipeline.subject_info_section(subject, 'rec_times')[rec]['start'])
+    time_array = spg.time.values
+    time_array = pd.to_timedelta(time_array, unit='s')
+    datetime_array = rec_start + time_array
+    spg = spg.assign_coords(datetime=('time', datetime_array))
+    return spg.swap_dims({'time': 'datetime'})
+
+def get_mt_spextrogram(data, subject, rec, seg_length=2, overlap=1, NW=4):
+    spg = compute_multitaper_spectrogram(data, seg_length, overlap, NW)
+    spg = add_datetime_to_spg(spg, subject, rec)
+    return spg
