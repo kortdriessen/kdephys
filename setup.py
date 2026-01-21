@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name="kdephys",
@@ -8,7 +8,10 @@ setup(
     author="Kort Driessen",
     author_email="driessen2@wisc.edu",
     license="MIT",
-    packages=["kdephys"],
+    # packages=find_packages(),
+    # package_data={"kdephys": ["py.typed"]},
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
     install_requires=[
         "pandas",
         "numpy",

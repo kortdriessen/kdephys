@@ -1,13 +1,14 @@
-from matplotlib.colors import LinearSegmentedColormap
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns  # TODO remove seaborn dependency
-import kdephys.xr.utils as xu
-import kdephys.xr.spectral as xsp
-from kdephys.utils.plots import hypno_colors
 import polars as pl
+import seaborn as sns  # TODO remove seaborn dependency
+from matplotlib.colors import LinearSegmentedColormap
 from xhistogram.xarray import histogram
+
+import kdephys.xr.spectral as xsp
+import kdephys.xr.utils as xu
+from kdephys.utils.plots import hypno_colors
 
 
 # This function is taken directly from neurodsp.plts.utils.
@@ -52,9 +53,8 @@ def shade_hypno_for_me(hypnogram, ax=None, xlim=None, ymin=0, ymax=1, alpha=0.15
     ax: matplotlib.Axes, optional
         An axes upon which to plot.
     """
-    from kdephys.utils.plots import hypno_colors
     xlim = ax.get_xlim() if (ax and not xlim) else xlim
-    
+
     ax = check_ax(ax)
     for bout in hypnogram.itertuples():
         ax.axvspan(
@@ -71,10 +71,12 @@ def shade_hypno_for_me(hypnogram, ax=None, xlim=None, ymin=0, ymax=1, alpha=0.15
     ax.set_xlim(xlim)
     return ax
 
+
 def _add_hspan(ax, xmin, xmax, lower=0.8, upper=0.9):
     ylim = ax.get_ylim()
-    ax.axvspan(xmin, xmax, ymin=lower, ymax=upper, color='blue')
+    ax.axvspan(xmin, xmax, ymin=lower, ymax=upper, color="blue")
     return ax
+
 
 def add_light_schedule(times, ax=None, xlim=None):
     """add a bar to indicate light/dark periods at the top of an axes.
@@ -151,10 +153,11 @@ def spectro_plotter(
     vmax=None,
     title="Title",
     ax=None,
+    cmap="nipy_spectral",
 ):
     if f_range != None:
         spg = spg.sel(frequency=f_range)
-    
+
     try:
         # spg = spg.swap_dims({'datetime': 'time'})
         spg = spg.sel(channel=chan)
@@ -170,7 +173,7 @@ def spectro_plotter(
         spg_times,
         freqs,
         np.log10(spg),
-        cmap="nipy_spectral",
+        cmap=cmap,
         vmin=vmin,
         vmax=vmax,
         alpha=0.5,
@@ -329,122 +332,167 @@ def quick_bp_channel_plot(bp, band="delta"):
     return
 
 
-def _plot_overlapped_fp(data, df_map=None, pal=None, shade_df=None, hspace=-0.5, height=3, aspect=12):
-    plt.rcParams['axes.spines.bottom'] = False
-    plt.rcParams['axes.spines.left'] = False
-    plt.rcParams['axes.spines.right'] = False
-    plt.rcParams['axes.spines.top'] = False
-    plt.rcParams['axes.grid'] = False
-    plt.rcParams['xtick.major.size'] = 0
-    plt.rcParams['figure.facecolor'] = 'white'
-    plt.rcParams['axes.facecolor'] = 'None'
+def _plot_overlapped_fp(
+    data, df_map=None, pal=None, shade_df=None, hspace=-0.5, height=3, aspect=12
+):
+    plt.rcParams["axes.spines.bottom"] = False
+    plt.rcParams["axes.spines.left"] = False
+    plt.rcParams["axes.spines.right"] = False
+    plt.rcParams["axes.spines.top"] = False
+    plt.rcParams["axes.grid"] = False
+    plt.rcParams["xtick.major.size"] = 0
+    plt.rcParams["figure.facecolor"] = "white"
+    plt.rcParams["axes.facecolor"] = "None"
     if pal is None:
-        pal = sns.cubehelix_palette(16, rot=-.25, light=.7)
-    xname = 'time' if 'time' in data.columns else 't'
+        pal = sns.cubehelix_palette(16, rot=-0.25, light=0.7)
+    xname = "time" if "time" in data.columns else "t"
     if xname not in data.columns:
-        xname = 'datetime'
-    yname = 'data' if 'data' in data.columns else 'd'
+        xname = "datetime"
+    yname = "data" if "data" in data.columns else "d"
     assert xname in data.columns, f"xname {xname} not in data"
     assert yname in data.columns, f"yname {yname} not in data"
-    if 'condition' in data.columns:
-        g = sns.relplot(data=data, clip_on=False, x=xname, y=yname, hue='condition', palette=pal, row='channel', kind='line', linewidth=3, aspect=aspect, height=height)
+    if "condition" in data.columns:
+        g = sns.relplot(
+            data=data,
+            clip_on=False,
+            x=xname,
+            y=yname,
+            hue="condition",
+            palette=pal,
+            row="channel",
+            kind="line",
+            linewidth=3,
+            aspect=aspect,
+            height=height,
+        )
     else:
-        g = sns.relplot(data=data, clip_on=False, x=xname, y=yname, palette=pal, hue='channel', row='channel', kind='line', linewidth=3, aspect=aspect, height=height)
-    g.figure.subplots_adjust(hspace=hspace)
-
-
-    if shade_df is not None:
-        for channel in shade_df.channel.unique():
-            shade_df_chan = shade_df.loc[shade_df.channel == channel]
-            for row in shade_df_chan.itertuples():
-                g.axes[channel-1, 0].axvspan(row.start_datetime, row.end_datetime, color='red', alpha=0.3)
-    g.set_titles("")
-    g.set(yticks=[], ylabel="")
-    g.despine(bottom=True, left=True);
-    return g
-
-def plot_overlapped_fp(data, df_map=None, pal=None, shade_df=None, hspace=-0.5, height=3, aspect=12):
-    plt.rcParams['axes.spines.bottom'] = False
-    plt.rcParams['axes.spines.left'] = False
-    plt.rcParams['axes.spines.right'] = False
-    plt.rcParams['axes.spines.top'] = False
-    plt.rcParams['axes.grid'] = False
-    plt.rcParams['xtick.major.size'] = 0
-    plt.rcParams['figure.facecolor'] = 'white'
-    plt.rcParams['axes.facecolor'] = 'None'
-    
-    if pal is None:
-        pal = sns.cubehelix_palette(16, rot=-.25, light=.7)
-        
-    xname = 'time' if 'time' in data.columns else 't'
-    if xname not in data.columns:
-        xname = 'datetime'
-    yname = 'data' if 'data' in data.columns else 'd'
-    
-    assert xname in data.columns, f"xname {xname} not in data"
-    assert yname in data.columns, f"yname {yname} not in data"
-
-    if 'condition' in data.columns:
-        g = sns.relplot(data=data, clip_on=False, x=xname, y=yname, hue='condition', 
-                       palette=pal, row='channel', kind='line', linewidth=3, 
-                       aspect=aspect, height=height)
-    else:
-        # Create base FacetGrid
-        g = sns.FacetGrid(data=data, row='channel', aspect=aspect, height=height)
-        # Add lineplot layer
-        g.map(sns.lineplot, data=data, x=xname, y=yname, linewidth=3)
-        # Add scatterplot layer if df_map is provided
-        if df_map is not None:
-            g.map(sns.scatterplot, data=df_map, x='datetime', y='plot_val', hue='channel')
-
+        g = sns.relplot(
+            data=data,
+            clip_on=False,
+            x=xname,
+            y=yname,
+            palette=pal,
+            hue="channel",
+            row="channel",
+            kind="line",
+            linewidth=3,
+            aspect=aspect,
+            height=height,
+        )
     g.figure.subplots_adjust(hspace=hspace)
 
     if shade_df is not None:
         for channel in shade_df.channel.unique():
             shade_df_chan = shade_df.loc[shade_df.channel == channel]
             for row in shade_df_chan.itertuples():
-                g.axes[channel-1, 0].axvspan(row.start_datetime, row.end_datetime, 
-                                           color='red', alpha=0.3)
-                
+                g.axes[channel - 1, 0].axvspan(
+                    row.start_datetime, row.end_datetime, color="red", alpha=0.3
+                )
     g.set_titles("")
     g.set(yticks=[], ylabel="")
     g.despine(bottom=True, left=True)
     return g
 
-def plot_basic_hypnogram(h, size=(20, 1), xlim=None, style_path=None, single_tone=False):
-    
+
+def plot_overlapped_fp(
+    data, df_map=None, pal=None, shade_df=None, hspace=-0.5, height=3, aspect=12
+):
+    plt.rcParams["axes.spines.bottom"] = False
+    plt.rcParams["axes.spines.left"] = False
+    plt.rcParams["axes.spines.right"] = False
+    plt.rcParams["axes.spines.top"] = False
+    plt.rcParams["axes.grid"] = False
+    plt.rcParams["xtick.major.size"] = 0
+    plt.rcParams["figure.facecolor"] = "white"
+    plt.rcParams["axes.facecolor"] = "None"
+
+    if pal is None:
+        pal = sns.cubehelix_palette(16, rot=-0.25, light=0.7)
+
+    xname = "time" if "time" in data.columns else "t"
+    if xname not in data.columns:
+        xname = "datetime"
+    yname = "data" if "data" in data.columns else "d"
+
+    assert xname in data.columns, f"xname {xname} not in data"
+    assert yname in data.columns, f"yname {yname} not in data"
+
+    if "condition" in data.columns:
+        g = sns.relplot(
+            data=data,
+            clip_on=False,
+            x=xname,
+            y=yname,
+            hue="condition",
+            palette=pal,
+            row="channel",
+            kind="line",
+            linewidth=3,
+            aspect=aspect,
+            height=height,
+        )
+    else:
+        # Create base FacetGrid
+        g = sns.FacetGrid(data=data, row="channel", aspect=aspect, height=height)
+        # Add lineplot layer
+        g.map(sns.lineplot, data=data, x=xname, y=yname, linewidth=3)
+        # Add scatterplot layer if df_map is provided
+        if df_map is not None:
+            g.map(
+                sns.scatterplot, data=df_map, x="datetime", y="plot_val", hue="channel"
+            )
+
+    g.figure.subplots_adjust(hspace=hspace)
+
+    if shade_df is not None:
+        for channel in shade_df.channel.unique():
+            shade_df_chan = shade_df.loc[shade_df.channel == channel]
+            for row in shade_df_chan.itertuples():
+                g.axes[channel - 1, 0].axvspan(
+                    row.start_datetime, row.end_datetime, color="red", alpha=0.3
+                )
+
+    g.set_titles("")
+    g.set(yticks=[], ylabel="")
+    g.despine(bottom=True, left=True)
+    return g
+
+
+def plot_basic_hypnogram(
+    h, size=(20, 1), xlim=None, style_path=None, single_tone=False
+):
     state_colors = {}
     if single_tone:
         # GRAY SCALE
-        state_colors['Wake'] = (1, "#333333")
-        state_colors['NREM'] = (2, "#4f4f4f")
-        state_colors['REM'] = (3, "#797979")
-        
+        state_colors["Wake"] = (1, "#333333")
+        state_colors["NREM"] = (2, "#4f4f4f")
+        state_colors["REM"] = (3, "#797979")
+
         # REDS
-        state_colors['Wake'] = (1, "#6E2032")
-        state_colors['NREM'] = (2, "#983F3F")
-        state_colors['REM'] = (3, "#C88E87")
-    
+        state_colors["Wake"] = (1, "#6E2032")
+        state_colors["NREM"] = (2, "#983F3F")
+        state_colors["REM"] = (3, "#C88E87")
+
     else:
-        state_colors['NREM'] = (2, "#4b71e3")
-        state_colors['REM'] = (3, '#e34bde')
-        state_colors['Wake'] = (1, '#4be350')
-    
+        state_colors["NREM"] = (2, "#4b71e3")
+        state_colors["REM"] = (3, "#e34bde")
+        state_colors["Wake"] = (1, "#4be350")
+
     plt.rcdefaults()
     if style_path is not None:
         plt.style.use(style_path)
-    plt.rcParams['axes.spines.left'] = False
-    plt.rcParams['axes.spines.bottom'] = False
-    plt.rcParams['axes.spines.right'] = False
-    plt.rcParams['axes.spines.top'] = False
-    plt.rcParams['xtick.bottom'] = False
+    plt.rcParams["axes.spines.left"] = False
+    plt.rcParams["axes.spines.bottom"] = False
+    plt.rcParams["axes.spines.right"] = False
+    plt.rcParams["axes.spines.top"] = False
+    plt.rcParams["xtick.bottom"] = False
     f, ax = plt.subplots(figsize=size)
     ax.set_ylim(0, 3)
     if xlim is not None:
         ax.set_xlim(xlim)
     else:
         ax.set_xlim(h.start_time.min(), h.end_time.max())
-    
+
     # Add small epsilon to avoid exact overlap
     epsilon = pd.Timedelta(milliseconds=1)
 
@@ -452,71 +500,103 @@ def plot_basic_hypnogram(h, size=(20, 1), xlim=None, style_path=None, single_ton
         if bout.state in state_colors.keys():
             value, color = state_colors[bout.state]
         else:
-            value, color = state_colors['Wake']
-        
-        y_range = (value-1, value)
-        y_range = (y_range[0]/3, y_range[1]/3)
-        
+            value, color = state_colors["Wake"]
+
+        y_range = (value - 1, value)
+        y_range = (y_range[0] / 3, y_range[1] / 3)
+
         # Adjust end time of previous bout if there's an overlap
         start_time = bout.start_time
         end_time = bout.end_time
-        
+
         # Ensure no overlap with previous bout
-        if i > 0 and start_time <= h.iloc[i-1].end_time:
+        if i > 0 and start_time <= h.iloc[i - 1].end_time:
             # Set start time to just after previous bout's end time
-            start_time = h.iloc[i-1].end_time + epsilon
-        
-        ax.axvspan(start_time, end_time, ymin=y_range[0], ymax=y_range[1], 
-                color=color, alpha=1, linewidth=0)
+            start_time = h.iloc[i - 1].end_time + epsilon
+
+        ax.axvspan(
+            start_time,
+            end_time,
+            ymin=y_range[0],
+            ymax=y_range[1],
+            color=color,
+            alpha=1,
+            linewidth=0,
+        )
 
     ax.set_yticks([])
 
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
     return f, ax
 
-def base_raster(data, xname='datetime', yname='negchan', pal=None, hspace=-0.5, color='blue', figsize=(24, 8)):
-    plt.rcParams['axes.spines.bottom'] = False
-    plt.rcParams['axes.spines.left'] = False
-    plt.rcParams['axes.spines.right'] = False
-    plt.rcParams['axes.spines.top'] = False
-    plt.rcParams['axes.grid'] = False
-    plt.rcParams['xtick.major.size'] = 0
-    plt.rcParams['figure.facecolor'] = 'white'
-    plt.rcParams['axes.facecolor'] = 'None'
-    
+
+def base_raster(
+    data,
+    xname="datetime",
+    yname="negchan",
+    pal=None,
+    hspace=-0.5,
+    color="blue",
+    figsize=(24, 8),
+):
+    plt.rcParams["axes.spines.bottom"] = False
+    plt.rcParams["axes.spines.left"] = False
+    plt.rcParams["axes.spines.right"] = False
+    plt.rcParams["axes.spines.top"] = False
+    plt.rcParams["axes.grid"] = False
+    plt.rcParams["xtick.major.size"] = 0
+    plt.rcParams["figure.facecolor"] = "white"
+    plt.rcParams["axes.facecolor"] = "None"
+
     assert xname in data.columns, f"xname {xname} not in data"
     assert yname in data.columns, f"yname {yname} not in data"
 
     f, ax = plt.subplots(figsize=figsize)
-    ax = sns.scatterplot(data, x=xname, y=yname, linewidth=0, alpha=0.7, s=60, ax=ax, color=color)
+    ax = sns.scatterplot(
+        data, x=xname, y=yname, linewidth=0, alpha=0.7, s=60, ax=ax, color=color
+    )
     ax.set_yticks([])
     ax.set_xticks([])
     plt.tight_layout()
     return f, ax
-    
-def base_trace_plot(data, xname='datetime', yname='data', color='blue', hspace=-0.5, height=3,  aspect=12):
-    plt.rcParams['axes.spines.bottom'] = False
-    plt.rcParams['axes.spines.left'] = False
-    plt.rcParams['axes.spines.right'] = False
-    plt.rcParams['axes.spines.top'] = False
-    plt.rcParams['axes.grid'] = False
-    plt.rcParams['xtick.major.size'] = 0
-    plt.rcParams['figure.facecolor'] = 'white'
-    plt.rcParams['axes.facecolor'] = 'None'     
-        
+
+
+def base_trace_plot(
+    data, xname="datetime", yname="data", color="blue", hspace=-0.5, height=3, aspect=12
+):
+    plt.rcParams["axes.spines.bottom"] = False
+    plt.rcParams["axes.spines.left"] = False
+    plt.rcParams["axes.spines.right"] = False
+    plt.rcParams["axes.spines.top"] = False
+    plt.rcParams["axes.grid"] = False
+    plt.rcParams["xtick.major.size"] = 0
+    plt.rcParams["figure.facecolor"] = "white"
+    plt.rcParams["axes.facecolor"] = "None"
+
     assert xname in data.columns, f"xname {xname} not in data"
     assert yname in data.columns, f"yname {yname} not in data"
 
     # Create line relplot
-    g = sns.relplot(data, x=xname, y=yname, row='channel', linewidth=3, aspect=aspect, height=height, color=color, kind='line')
+    g = sns.relplot(
+        data,
+        x=xname,
+        y=yname,
+        row="channel",
+        linewidth=3,
+        aspect=aspect,
+        height=height,
+        color=color,
+        kind="line",
+    )
 
-    g.figure.subplots_adjust(hspace=hspace)         
+    g.figure.subplots_adjust(hspace=hspace)
     g.set_titles("")
     g.set(yticks=[], ylabel="")
     g.despine(bottom=True, left=True)
     return g
 
-def trace_plot(data, times, hspace=-0.6, figsize=(40, 12), color='blue'):
+
+def trace_plot(data, times, hspace=-0.6, figsize=(40, 12), color="blue"):
     """Quick plot of raw data traces
 
     Parameters
@@ -536,7 +616,10 @@ def trace_plot(data, times, hspace=-0.6, figsize=(40, 12), color='blue'):
     plt.subplots_adjust(hspace=hspace)
     return f, ax
 
-def quick_trace_plot(data, times, stim_starts, stim_ends, color='blue', hspace=-0.6, figsize=(28, 10)):
+
+def quick_trace_plot(
+    data, times, stim_starts, stim_ends, color="blue", hspace=-0.6, figsize=(28, 10)
+):
     """Quick plot of raw data with stimulations
 
     Parameters
@@ -563,10 +646,27 @@ def quick_trace_plot(data, times, stim_starts, stim_ends, color='blue', hspace=-
     for on, off in zip(stim_starts, stim_ends):
         for a in ax:
             a.set_xlim(times[0], times[-1])
-            a.axvspan(on, off, color='cornflowerblue', ymin=0.325, ymax=0.712, alpha=0.5)
+            a.axvspan(
+                on, off, color="cornflowerblue", ymin=0.325, ymax=0.712, alpha=0.5
+            )
     return f, ax
 
-def mua_lfp_combo_plot(mua, lfp, hspace=-0.3, total_time=3, figsize=(40, 20), mua_color='blue', lfp_color='darkorange', mua_linewidth=2, lfp_linewidth=4, autolim=False, lfp_ylim=(-1500, 1500), mua_ylim=(-700, 700), chan_colors={}):
+
+def mua_lfp_combo_plot(
+    mua,
+    lfp,
+    hspace=-0.3,
+    total_time=3,
+    figsize=(40, 20),
+    mua_color="blue",
+    lfp_color="darkorange",
+    mua_linewidth=2,
+    lfp_linewidth=4,
+    autolim=False,
+    lfp_ylim=(-1500, 1500),
+    mua_ylim=(-700, 700),
+    chan_colors={},
+):
     """Quick plot of raw data traces
 
     Parameters
@@ -584,32 +684,43 @@ def mua_lfp_combo_plot(mua, lfp, hspace=-0.3, total_time=3, figsize=(40, 20), mu
     t1 = np.linspace(0, total_time, mua.shape[1])
     t2 = np.linspace(0, total_time, lfp.shape[1])
     f, ax = plt.subplots(mua.shape[0], 1, figsize=figsize)
-    
+
     for i in range(mua.shape[0]):
-        if i+1 in chan_colors:
-            mc = chan_colors[i+1]
-            lc = chan_colors[i+1]
+        if i + 1 in chan_colors:
+            mc = chan_colors[i + 1]
+            lc = chan_colors[i + 1]
         else:
             mc = mua_color
             lc = lfp_color
-        
+
         ax[i].plot(t1, mua[i, :], color=mc, linewidth=mua_linewidth)
         ax2 = ax[i].twinx()
         ax2.plot(t2, lfp[i, :], color=lc, linewidth=lfp_linewidth, alpha=0.8)
-        
+
         ax[i].set_yticks([])
         ax2.set_yticks([])
         ax[i].set_yticklabels([])
         ax2.set_yticklabels([])
-        
-        if autolim==False:
+
+        if autolim == False:
             ax[i].set_ylim(mua_ylim)
             ax2.set_ylim(lfp_ylim)
-        
+
     plt.subplots_adjust(hspace=hspace)
     return f, ax
 
-def atomic_lfp(lfp_data, times=None, sems=None, hspace=-0.6, figsize=(24, 8), color='blue', line_alpha=1, linewidth=2):
+
+def atomic_lfp(
+    lfp_data,
+    times=None,
+    sems=None,
+    hspace=-0.6,
+    figsize=(24, 8),
+    color="blue",
+    line_alpha=1,
+    linewidth=2,
+    equalize_ylims=True,
+):
     """Quick plot of raw LFP lfp_data traces
 
     Parameters
@@ -625,31 +736,56 @@ def atomic_lfp(lfp_data, times=None, sems=None, hspace=-0.6, figsize=(24, 8), co
     sems : np.ndarray, optional
         Semitransparent error bars, of shape (n_channels, n_samples)
     """
-    plt.rcParams['axes.spines.bottom'] = False
-    plt.rcParams['axes.spines.left'] = False
-    plt.rcParams['axes.spines.right'] = False
-    plt.rcParams['axes.spines.top'] = False
-    plt.rcParams['axes.grid'] = False
-    plt.rcParams['xtick.major.size'] = 0
-    plt.rcParams['figure.facecolor'] = 'white'
-    plt.rcParams['axes.facecolor'] = 'None'
-    plt.rcParams['xtick.labelbottom'] = False
-    plt.rcParams['ytick.labelleft'] = False
-    plt.rcParams['ytick.left'] = False
-    plt.rcParams['xtick.bottom'] = False
-    
+    plt.rcParams["axes.spines.bottom"] = False
+    plt.rcParams["axes.spines.left"] = False
+    plt.rcParams["axes.spines.right"] = False
+    plt.rcParams["axes.spines.top"] = False
+    plt.rcParams["axes.grid"] = False
+    plt.rcParams["xtick.major.size"] = 0
+    plt.rcParams["figure.facecolor"] = "white"
+    plt.rcParams["axes.facecolor"] = "None"
+    plt.rcParams["xtick.labelbottom"] = False
+    plt.rcParams["ytick.labelleft"] = False
+    plt.rcParams["ytick.left"] = False
+    plt.rcParams["xtick.bottom"] = False
+
     if times is None:
         times = np.arange(lfp_data.shape[1])
     f, ax = plt.subplots(lfp_data.shape[0], 1, figsize=figsize)
     for i in range(lfp_data.shape[0]):
-        ax[i].plot(times, lfp_data[i, :], color=color, alpha=line_alpha, linewidth=linewidth)
+        ax[i].plot(
+            times, lfp_data[i, :], color=color, alpha=line_alpha, linewidth=linewidth
+        )
         ax[i].set_xlim(times[0], times[-1])
         if sems is not None:
-            ax[i].fill_between(times, lfp_data[i, :]-sems[i, :], lfp_data[i, :]+sems[i, :], color=color, alpha=0.2)
+            ax[i].fill_between(
+                times,
+                lfp_data[i, :] - sems[i, :],
+                lfp_data[i, :] + sems[i, :],
+                color=color,
+                alpha=0.2,
+            )
+
     plt.subplots_adjust(hspace=hspace)
+    if equalize_ylims:
+        ymins = [ax[i].get_ylim()[0] for i in range(lfp_data.shape[0])]
+        ymaxs = [ax[i].get_ylim()[1] for i in range(lfp_data.shape[0])]
+        ymin = np.min(ymins)
+        ymax = np.max(ymaxs)
+        for a in ax:
+            a.set_ylim(ymin, ymax)
     return f, ax
 
-def atomic_raster(mua_df, xname='datetime', yname='negchan', color='blue', alpha=0.7, s=60, figsize=(24, 8)):
+
+def atomic_raster(
+    mua_df,
+    xname="datetime",
+    yname="negchan",
+    color="blue",
+    alpha=0.7,
+    s=60,
+    figsize=(24, 8),
+):
     """Plot a raster plot of MUA data
 
     Parameters
@@ -670,41 +806,47 @@ def atomic_raster(mua_df, xname='datetime', yname='negchan', color='blue', alpha
     f, ax : tuple
         Figure and axes objects
     """
-    
-    plt.rcParams['axes.spines.bottom'] = False
-    plt.rcParams['axes.spines.left'] = False
-    plt.rcParams['axes.spines.right'] = False
-    plt.rcParams['axes.spines.top'] = False
-    plt.rcParams['axes.grid'] = False
-    plt.rcParams['xtick.major.size'] = 0
-    plt.rcParams['figure.facecolor'] = 'white'
-    plt.rcParams['axes.facecolor'] = 'None'
-    
-    
-    
+
+    plt.rcParams["axes.spines.bottom"] = False
+    plt.rcParams["axes.spines.left"] = False
+    plt.rcParams["axes.spines.right"] = False
+    plt.rcParams["axes.spines.top"] = False
+    plt.rcParams["axes.grid"] = False
+    plt.rcParams["xtick.major.size"] = 0
+    plt.rcParams["figure.facecolor"] = "white"
+    plt.rcParams["axes.facecolor"] = "None"
+
     assert xname in mua_df.columns, f"xname {xname} not in mua_df"
     assert yname in mua_df.columns, f"yname {yname} not in mua_df"
 
-    
     f, ax = plt.subplots(figsize=figsize)
-    ax = sns.scatterplot(mua_df, x=xname, y=yname, linewidth=0, alpha=alpha, s=s, ax=ax, color=color)
+    ax = sns.scatterplot(
+        mua_df, x=xname, y=yname, linewidth=0, alpha=alpha, s=s, ax=ax, color=color
+    )
     ax.set_xlim()
     ax.set_yticks([])
     ax.set_xticks([])
     plt.tight_layout()
     return f, ax
 
-def plot_lfp_mua_combined(lfp_data, mua_df, times, 
-                          lfp_color='blue', mua_color='blue', 
-                          mua_xname='datetime', mua_yname='negchan',
-                          figsize=(36, 14), 
-                          lfp_subplot_hspace=-0.4,
-                          mua_height_multiplier=0.2,
-                          lw=1.5, 
-                          rsz=30,
-                          lfp_alpha=1,
-                          spike_alpha=0.7):
-    """Plots LFP traces (each channel in its own subplot, stacked) 
+
+def plot_lfp_mua_combined(
+    lfp_data,
+    mua_df,
+    times,
+    lfp_color="blue",
+    mua_color="blue",
+    mua_xname="datetime",
+    mua_yname="negchan",
+    figsize=(36, 14),
+    lfp_subplot_hspace=-0.4,
+    mua_height_multiplier=0.2,
+    lw=1.5,
+    rsz=30,
+    lfp_alpha=1,
+    spike_alpha=0.7,
+):
+    """Plots LFP traces (each channel in its own subplot, stacked)
     above an MUA raster plot, in a single figure.
 
     Parameters
@@ -726,8 +868,8 @@ def plot_lfp_mua_combined(lfp_data, mua_df, times,
     figsize : tuple, optional
         Size of the figure.
     lfp_subplot_hspace : float, optional
-        Vertical spacing between all subplots (LFP channels and MUA plot). 
-        Negative values (e.g., -0.5 or -0.6) can make LFP channel plots overlap, 
+        Vertical spacing between all subplots (LFP channels and MUA plot).
+        Negative values (e.g., -0.5 or -0.6) can make LFP channel plots overlap,
         similar to the original base_trace's hspace effect. Default is 0.0.
 
     Returns
@@ -737,76 +879,119 @@ def plot_lfp_mua_combined(lfp_data, mua_df, times,
     axs : np.ndarray of matplotlib.axes.Axes
         Array of axes. axs[0:-1] are LFP channel axes, axs[-1] is MUA axis.
     """
-    
+
     num_lfp_channels = lfp_data.shape[0]
     if num_lfp_channels == 0:
         print("No LFP data to plot. Plotting MUA only.")
-        f, mua_ax = plt.subplots(figsize=(figsize[0], figsize[1]/3.0 if figsize[1] and figsize[1] > 0 else 5))
-        plt.rcParams['figure.facecolor'] = 'white'
-        plt.rcParams['axes.facecolor'] = 'None'
-        sns.scatterplot(data=mua_df, x=mua_xname, y=mua_yname, linewidth=0, alpha=0.7, s=30, ax=mua_ax, color=mua_color)
+        f, mua_ax = plt.subplots(
+            figsize=(
+                figsize[0],
+                figsize[1] / 3.0 if figsize[1] and figsize[1] > 0 else 5,
+            )
+        )
+        plt.rcParams["figure.facecolor"] = "white"
+        plt.rcParams["axes.facecolor"] = "None"
+        sns.scatterplot(
+            data=mua_df,
+            x=mua_xname,
+            y=mua_yname,
+            linewidth=0,
+            alpha=0.7,
+            s=30,
+            ax=mua_ax,
+            color=mua_color,
+        )
         mua_ax.set_yticks([])
         mua_ax.set_yticklabels([])
-        mua_ax.tick_params(axis='x', which='both', bottom=True, top=False, labelbottom=True, labelsize=10)
+        mua_ax.tick_params(
+            axis="x",
+            which="both",
+            bottom=True,
+            top=False,
+            labelbottom=True,
+            labelsize=10,
+        )
         mua_ax.set_xlabel(str(mua_xname).capitalize(), fontsize=12)
-        mua_ax.spines['top'].set_visible(False)
-        mua_ax.spines['right'].set_visible(False)
-        mua_ax.spines['left'].set_visible(False)
+        mua_ax.spines["top"].set_visible(False)
+        mua_ax.spines["right"].set_visible(False)
+        mua_ax.spines["left"].set_visible(False)
         plt.tight_layout()
         return f, np.array([mua_ax])
 
-    plt.rcParams['axes.spines.left'] = False
-    plt.rcParams['axes.spines.right'] = False
-    plt.rcParams['axes.spines.top'] = False
-    plt.rcParams['axes.grid'] = False
-    #plt.rcParams['xtick.major.size'] = 0
-    plt.rcParams['figure.facecolor'] = 'white'
-    plt.rcParams['axes.facecolor'] = 'None'
-    plt.rcParams['ytick.left'] = False
+    plt.rcParams["axes.spines.left"] = False
+    plt.rcParams["axes.spines.right"] = False
+    plt.rcParams["axes.spines.top"] = False
+    plt.rcParams["axes.grid"] = False
+    # plt.rcParams['xtick.major.size'] = 0
+    plt.rcParams["figure.facecolor"] = "white"
+    plt.rcParams["axes.facecolor"] = "None"
+    plt.rcParams["ytick.left"] = False
 
-    total_rows = num_lfp_channels + 1 
+    total_rows = num_lfp_channels + 1
     f = plt.figure(figsize=figsize)
-    
-    mua_height_ratio = max(1, num_lfp_channels * mua_height_multiplier) 
+
+    mua_height_ratio = max(1, num_lfp_channels * mua_height_multiplier)
     height_ratios = [1] * num_lfp_channels + [mua_height_ratio]
-    
-    gs = f.add_gridspec(total_rows, 1, height_ratios=height_ratios, hspace=lfp_subplot_hspace)
-    
+
+    gs = f.add_gridspec(
+        total_rows, 1, height_ratios=height_ratios, hspace=lfp_subplot_hspace
+    )
+
     axs = np.empty(total_rows, dtype=object)
 
     for i in range(num_lfp_channels):
         axs[i] = f.add_subplot(gs[i, 0], sharex=axs[0] if i > 0 else None)
-        axs[i].plot(times, lfp_data[i, :], color=lfp_color, alpha=lfp_alpha, linewidth=lw)
-        if i == 0: # Set xlim only for the first plot, others will share
+        axs[i].plot(
+            times, lfp_data[i, :], color=lfp_color, alpha=lfp_alpha, linewidth=lw
+        )
+        if i == 0:  # Set xlim only for the first plot, others will share
             axs[i].set_xlim(times[0], times[-1])
         axs[i].set_yticks([])
         axs[i].set_yticklabels([])
-        axs[i].spines['bottom'].set_visible(False)
-        axs[i].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+        axs[i].spines["bottom"].set_visible(False)
+        axs[i].tick_params(
+            axis="x", which="both", bottom=False, top=False, labelbottom=False
+        )
 
-
-    
     axs[-1] = f.add_subplot(gs[-1, 0], sharex=axs[0])
     mua_ax = axs[-1]
-    sns.scatterplot(data=mua_df, x=mua_xname, y=mua_yname, linewidth=0, alpha=spike_alpha, s=rsz, ax=mua_ax, color=mua_color)
+    sns.scatterplot(
+        data=mua_df,
+        x=mua_xname,
+        y=mua_yname,
+        linewidth=0,
+        alpha=spike_alpha,
+        s=rsz,
+        ax=mua_ax,
+        color=mua_color,
+    )
     mua_ax.set_yticks([])
     mua_ax.set_yticklabels([])
-    mua_ax.tick_params(axis='x', which='both', bottom=True, top=False, labelbottom=True, labelsize=14)
+    mua_ax.tick_params(
+        axis="x", which="both", bottom=True, top=False, labelbottom=True, labelsize=14
+    )
     mua_ax.set_xlabel(str(mua_xname).capitalize(), fontsize=12)
-    mua_ax.spines['bottom'].set_visible(True)
+    mua_ax.spines["bottom"].set_visible(True)
 
     # Adjust the position of the last axes to move it further down
     pos = mua_ax.get_position()  # Get the current position
     mua_ax.set_position([pos.x0, pos.y0 - 0.04, pos.width, pos.height])
-    
+
     return f, axs
 
-def plot_lfp_counts_combined(lfp_data, mua_da, times, 
-                          lfp_color='blue', mua_color='blue', 
-                          mua_xname='datetime', mua_yname='negchan',
-                          figsize=(36, 14), 
-                          lfp_subplot_hspace=-0.4):
-    """Plots LFP traces (each channel in its own subplot, stacked) 
+
+def plot_lfp_counts_combined(
+    lfp_data,
+    mua_da,
+    times,
+    lfp_color="blue",
+    mua_color="blue",
+    mua_xname="datetime",
+    mua_yname="negchan",
+    figsize=(36, 14),
+    lfp_subplot_hspace=-0.4,
+):
+    """Plots LFP traces (each channel in its own subplot, stacked)
     above an MUA raster plot, in a single figure.
 
     Parameters
@@ -828,8 +1013,8 @@ def plot_lfp_counts_combined(lfp_data, mua_da, times,
     figsize : tuple, optional
         Size of the figure.
     lfp_subplot_hspace : float, optional
-        Vertical spacing between all subplots (LFP channels and MUA plot). 
-        Negative values (e.g., -0.5 or -0.6) can make LFP channel plots overlap, 
+        Vertical spacing between all subplots (LFP channels and MUA plot).
+        Negative values (e.g., -0.5 or -0.6) can make LFP channel plots overlap,
         similar to the original base_trace's hspace effect. Default is 0.0.
 
     Returns
@@ -839,100 +1024,154 @@ def plot_lfp_counts_combined(lfp_data, mua_da, times,
     axs : np.ndarray of matplotlib.axes.Axes
         Array of axes. axs[0:-1] are LFP channel axes, axs[-1] is MUA axis.
     """
-    
+
     num_lfp_channels = lfp_data.shape[0]
     if num_lfp_channels == 0:
         print("No LFP data to plot. Plotting MUA only.")
-        f, mua_ax = plt.subplots(figsize=(figsize[0], figsize[1]/3.0 if figsize[1] and figsize[1] > 0 else 5))
-        plt.rcParams['figure.facecolor'] = 'white'
-        plt.rcParams['axes.facecolor'] = 'None'
-        sns.scatterplot(data=mua_df, x=mua_xname, y=mua_yname, linewidth=0, alpha=0.7, s=30, ax=mua_ax, color=mua_color)
+        f, mua_ax = plt.subplots(
+            figsize=(
+                figsize[0],
+                figsize[1] / 3.0 if figsize[1] and figsize[1] > 0 else 5,
+            )
+        )
+        plt.rcParams["figure.facecolor"] = "white"
+        plt.rcParams["axes.facecolor"] = "None"
+        sns.scatterplot(
+            data=mua_df,
+            x=mua_xname,
+            y=mua_yname,
+            linewidth=0,
+            alpha=0.7,
+            s=30,
+            ax=mua_ax,
+            color=mua_color,
+        )
         mua_ax.set_yticks([])
         mua_ax.set_yticklabels([])
-        mua_ax.tick_params(axis='x', which='both', bottom=True, top=False, labelbottom=True, labelsize=10)
+        mua_ax.tick_params(
+            axis="x",
+            which="both",
+            bottom=True,
+            top=False,
+            labelbottom=True,
+            labelsize=10,
+        )
         mua_ax.set_xlabel(str(mua_xname).capitalize(), fontsize=12)
-        mua_ax.spines['top'].set_visible(False)
-        mua_ax.spines['right'].set_visible(False)
-        mua_ax.spines['left'].set_visible(False)
+        mua_ax.spines["top"].set_visible(False)
+        mua_ax.spines["right"].set_visible(False)
+        mua_ax.spines["left"].set_visible(False)
         plt.tight_layout()
         return f, np.array([mua_ax])
 
-    plt.rcParams['axes.spines.left'] = False
-    plt.rcParams['axes.spines.right'] = False
-    plt.rcParams['axes.spines.top'] = False
-    plt.rcParams['axes.grid'] = False
-    plt.rcParams['xtick.major.size'] = 0
-    plt.rcParams['figure.facecolor'] = 'white'
-    plt.rcParams['axes.facecolor'] = 'None'
-    plt.rcParams['ytick.left'] = False
+    plt.rcParams["axes.spines.left"] = False
+    plt.rcParams["axes.spines.right"] = False
+    plt.rcParams["axes.spines.top"] = False
+    plt.rcParams["axes.grid"] = False
+    plt.rcParams["xtick.major.size"] = 0
+    plt.rcParams["figure.facecolor"] = "white"
+    plt.rcParams["axes.facecolor"] = "None"
+    plt.rcParams["ytick.left"] = False
 
-    total_rows = num_lfp_channels + 1 
+    total_rows = num_lfp_channels + 1
     f = plt.figure(figsize=figsize)
-    
-    mua_height_ratio = max(1, num_lfp_channels * 0.2) 
+
+    mua_height_ratio = max(1, num_lfp_channels * 0.2)
     height_ratios = [1] * num_lfp_channels + [mua_height_ratio]
-    
-    gs = f.add_gridspec(total_rows, 1, height_ratios=height_ratios, hspace=lfp_subplot_hspace)
-    
+
+    gs = f.add_gridspec(
+        total_rows, 1, height_ratios=height_ratios, hspace=lfp_subplot_hspace
+    )
+
     axs = np.empty(total_rows, dtype=object)
 
     for i in range(num_lfp_channels):
         axs[i] = f.add_subplot(gs[i, 0], sharex=axs[0] if i > 0 else None)
         axs[i].plot(times, lfp_data[i, :], color=lfp_color, linewidth=1.5)
-        if i == 0: # Set xlim only for the first plot, others will share
+        if i == 0:  # Set xlim only for the first plot, others will share
             axs[i].set_xlim(times[0], times[-1])
         axs[i].set_yticks([])
         axs[i].set_yticklabels([])
-        axs[i].spines['bottom'].set_visible(False)
-        axs[i].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+        axs[i].spines["bottom"].set_visible(False)
+        axs[i].tick_params(
+            axis="x", which="both", bottom=False, top=False, labelbottom=False
+        )
 
     axs[-1] = f.add_subplot(gs[-1, 0], sharex=axs[0])
     mua_ax = axs[-1]
 
-    
-    mua_da.plot.imshow(ax=mua_ax, cmap='hot', origin='upper')
+    mua_da.plot.imshow(ax=mua_ax, cmap="hot", origin="upper")
     if mua_ax.images:  # Check if there are any images on the axes#remove the scale bar
         last_image = mua_ax.images[-1]  # Get the last image artist
-        if hasattr(last_image, 'colorbar') and last_image.colorbar:
+        if hasattr(last_image, "colorbar") and last_image.colorbar:
             last_image.colorbar.remove()
-    
 
-    
     mua_ax.set_yticks([])
     mua_ax.set_yticklabels([])
-    mua_ax.tick_params(axis='x', which='both', bottom=True, top=False, labelbottom=True, labelsize=14)
+    mua_ax.tick_params(
+        axis="x", which="both", bottom=True, top=False, labelbottom=True, labelsize=14
+    )
     mua_ax.set_xlabel(str(mua_xname).capitalize(), fontsize=12)
-    mua_ax.spines['bottom'].set_visible(True)
+    mua_ax.spines["bottom"].set_visible(True)
 
     # Adjust the position of the last axes to move it further down
     pos = mua_ax.get_position()  # Get the current position
     mua_ax.set_position([pos.x0, pos.y0 - 0.03, pos.width, pos.height])
-    
+
     return f, axs
 
+
 import matplotlib.colors as mcolors
-import matplotlib
-def shade_oodf(axs, oodf, off_color='cyan', on_color='green', alpha=0.2, single_ax=False, lw=3):
+
+
+def shade_oodf(
+    axs, oodf, off_color="cyan", on_color="green", alpha=0.2, single_ax=False, lw=3
+):
     if single_ax:
         axs = [axs]
-    if 'channel' in oodf.columns:
+    if "channel" in oodf.columns:
         raise ValueError("oodf should not have channel column")
     for row in oodf.iter_rows(named=True):
-        if row['status'] == 'on':
-            print(row['start_datetime'], row['end_datetime'])
-            [ax.axvspan(row['start_datetime'], row['end_datetime'], color=on_color, alpha=alpha) for ax in axs]
-        elif row['status'] == 'off':
+        if row["status"] == "on":
+            print(row["start_datetime"], row["end_datetime"])
+            [
+                ax.axvspan(
+                    row["start_datetime"],
+                    row["end_datetime"],
+                    color=on_color,
+                    alpha=alpha,
+                )
+                for ax in axs
+            ]
+        elif row["status"] == "off":
             fill_clr = mcolors.to_rgba(off_color, alpha)
-            [ax.axvspan(row['start_datetime'], row['end_datetime'], facecolor=fill_clr, edgecolor='purple', linewidth=lw) for ax in axs]
+            [
+                ax.axvspan(
+                    row["start_datetime"],
+                    row["end_datetime"],
+                    facecolor=fill_clr,
+                    edgecolor="purple",
+                    linewidth=lw,
+                )
+                for ax in axs
+            ]
     return axs
 
+
 def shade_oodf_single_chan(ax, scdf, negchan=-1, span=0.5, alpha=0.7):
-    for channel in scdf['channel'].unique():
-        chdf = scdf.filter(pl.col('channel') == channel)
-        chval = channel*negchan
+    for channel in scdf["channel"].unique():
+        chdf = scdf.filter(pl.col("channel") == channel)
+        chval = channel * negchan
         for bout in chdf.iter_rows(named=True):
-            ax.fill_betweenx([chval - span, chval + span], bout['start_datetime'], bout['end_datetime'], color='orange' if bout['status'] == 'off' else 'green', lw=0.5, alpha=alpha)
+            ax.fill_betweenx(
+                [chval - span, chval + span],
+                bout["start_datetime"],
+                bout["end_datetime"],
+                color="orange" if bout["status"] == "off" else "green",
+                lw=0.5,
+                alpha=alpha,
+            )
     return ax
+
 
 def _plot_histos_from_da(da):
     f, ax = plt.subplots(1, 1, figsize=(45, 15))
@@ -945,21 +1184,20 @@ def _plot_histos_from_da(da):
     )
 
     h_chan = histogram(
-                da,
-                dim=["datetime"],
-                bins=bins,
-                density=False,
-            )
+        da,
+        dim=["datetime"],
+        bins=bins,
+        density=False,
+    )
     print(h_chan.shape)
     h_chan = h_chan / h_chan.max(dim=h_chan.dims[1])
     h_chan.plot(ax=ax)
-    
+
     return f, ax
 
-def custom_diverging_cmap(low='black', mid='#cdcdcd', high='royalblue', resolution=256):
+
+def custom_diverging_cmap(low="black", mid="#cdcdcd", high="royalblue", resolution=256):
     cmap = LinearSegmentedColormap.from_list(
-        "blue_white_red",
-        [low, mid, high],
-        N=resolution                                  
+        "blue_white_red", [low, mid, high], N=resolution
     )
     return cmap
