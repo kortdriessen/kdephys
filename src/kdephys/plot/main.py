@@ -720,6 +720,7 @@ def atomic_lfp(
     line_alpha=1,
     linewidth=2,
     equalize_ylims=True,
+    ylim_vals=None,
 ):
     """Quick plot of raw LFP lfp_data traces
 
@@ -768,10 +769,14 @@ def atomic_lfp(
 
     plt.subplots_adjust(hspace=hspace)
     if equalize_ylims:
-        ymins = [ax[i].get_ylim()[0] for i in range(lfp_data.shape[0])]
-        ymaxs = [ax[i].get_ylim()[1] for i in range(lfp_data.shape[0])]
-        ymin = np.min(ymins)
-        ymax = np.max(ymaxs)
+        if ylim_vals is not None:
+            ymin = ylim_vals[0]
+            ymax = ylim_vals[1]
+        else:
+            ymins = [ax[i].get_ylim()[0] for i in range(lfp_data.shape[0])]
+            ymaxs = [ax[i].get_ylim()[1] for i in range(lfp_data.shape[0])]
+            ymin = np.min(ymins)
+            ymax = np.max(ymaxs)
         for a in ax:
             a.set_ylim(ymin, ymax)
     return f, ax
@@ -845,6 +850,7 @@ def plot_lfp_mua_combined(
     rsz=30,
     lfp_alpha=1,
     spike_alpha=0.7,
+    mua_down=0.04,
 ):
     """Plots LFP traces (each channel in its own subplot, stacked)
     above an MUA raster plot, in a single figure.
@@ -870,7 +876,9 @@ def plot_lfp_mua_combined(
     lfp_subplot_hspace : float, optional
         Vertical spacing between all subplots (LFP channels and MUA plot).
         Negative values (e.g., -0.5 or -0.6) can make LFP channel plots overlap,
-        similar to the original base_trace's hspace effect. Default is 0.0.
+        similar to the original base_trace's hspace effect. Default is -0.4.
+    mua_down : float, optional
+        how far to shift the mua plot downward, to separate it further from LFPs.
 
     Returns
     -------
@@ -921,11 +929,13 @@ def plot_lfp_mua_combined(
     plt.rcParams["axes.spines.left"] = False
     plt.rcParams["axes.spines.right"] = False
     plt.rcParams["axes.spines.top"] = False
+    plt.rcParams["axes.spines.bottom"] = False  # KD
     plt.rcParams["axes.grid"] = False
     # plt.rcParams['xtick.major.size'] = 0
     plt.rcParams["figure.facecolor"] = "white"
     plt.rcParams["axes.facecolor"] = "None"
     plt.rcParams["ytick.left"] = False
+    plt.rcParams["xtick.bottom"] = False  # KD
 
     total_rows = num_lfp_channels + 1
     f = plt.figure(figsize=figsize)
@@ -975,7 +985,7 @@ def plot_lfp_mua_combined(
 
     # Adjust the position of the last axes to move it further down
     pos = mua_ax.get_position()  # Get the current position
-    mua_ax.set_position([pos.x0, pos.y0 - 0.04, pos.width, pos.height])
+    mua_ax.set_position([pos.x0, pos.y0 - mua_down, pos.width, pos.height])
 
     return f, axs
 

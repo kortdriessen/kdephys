@@ -1,14 +1,15 @@
-import numpy as np
-import pandas as pd
-import xarray as xr
-import kdephys.plot.main as kp
-import kdephys.hypno as hp
-
-from scipy.signal import spectrogram
 from functools import partial
 from multiprocessing import Pool
 
+import numpy as np
+import pandas as pd
+import xarray as xr
+from scipy.signal import butter, sosfiltfilt, spectrogram
+
+import kdephys.hypno as hp
+import kdephys.plot.main as kp
 import kdephys.utils.spectral as sp
+
 bands = sp.bands
 """
 Functions taken directly from ecephys.signal.timefrequency to remove dependency on ecephys package
@@ -225,9 +226,9 @@ def parallel_spectrogram_welch(sig, fs, **kwargs):
     with Pool(n_chans) as p:
         freqs, spg_times, spg = zip(*p.map(worker, jobs))
 
-    assert all_arrays_equal(
-        freqs
-    ), "Spectrogram frequecies must match for all channels."
+    assert all_arrays_equal(freqs), (
+        "Spectrogram frequecies must match for all channels."
+    )
     assert all_arrays_equal(spg_times), "Segment times must match for all channels."
 
     freqs = freqs[0]
@@ -288,10 +289,10 @@ def get_spextrogram(
         freqs, spg_time, spg = single_spectrogram_welch(sig.values, sig.fs, **kwargs)
 
     time = sig.time.values.min() + spg_time
-    
-    if 'timedelta' in list(sig.coords):
+
+    if "timedelta" in list(sig.coords):
         timedelta = sig.timedelta.values.min() + pd.to_timedelta(spg_time, "s")
-    if 'datetime' in list(sig.coords):
+    if "datetime" in list(sig.coords):
         datetime = sig.datetime.values.min() + pd.to_timedelta(spg_time, "s")
 
     if "channel" in sig.dims:
@@ -332,9 +333,9 @@ def filt_spg_by_state(spg, hyp, state):
     state --> list of strings specifying the states to KEEP
     """
     assert type(spg) == xr.core.dataarray.DataArray, "spg must be an xarray.DataArray"
-    assert (
-        "datetime" in spg.dims
-    ), f"spg must have datetime dimension, current dimensions are: {spg.dims}"
+    assert "datetime" in spg.dims, (
+        f"spg must have datetime dimension, current dimensions are: {spg.dims}"
+    )
 
     spg = spg.sel(datetime=hyp.keep_states(state).covers_time(spg.datetime)).dropna(
         dim="datetime"
@@ -407,7 +408,7 @@ def get_bp_set(spg, bands=bands):
     bp_ds = xr.Dataset({})
     bp_vars = {}
     keys = list(bands.keys())
-    
+
     for k in keys:
         bp_vars[k] = get_bandpower(spg, bands[k])
 
@@ -431,9 +432,9 @@ def filt_bp_set_by_state(bp_set, hyp, state):
     hyp --> DateTimeHypnogram (defined in kdephys.ecephys_hypnogram)
     state --> list of strings providing the states to KEEP
     """
-    assert (
-        "datetime" in bp_set.dims
-    ), f"Need datetime dimension in bp_set, current dimensions are {bp_set.dims}"
+    assert "datetime" in bp_set.dims, (
+        f"Need datetime dimension in bp_set, current dimensions are {bp_set.dims}"
+    )
 
     bp_set = bp_set.sel(
         datetime=hyp.keep_states(state).covers_time(bp_set.datetime)
@@ -525,69 +526,75 @@ def get_muscle_energy(m, window_length=8, overlap=1):
     return energies
 
 
+def bandpass_filter_raw_data(sig, f_range):
+    fs = sig.fs
+    nyq = fs / 2.0
+    low = f_range[0] / nyq
+    high = f_range[1] / nyq
+    sos = butter(4, [low, high], btype="band", output="sos")
+    filtered = sosfiltfilt(sos, sig.values, axis=sig.dims.index("datetime"))
+    return xr.DataArray(filtered, dims=sig.dims, coords=sig.coords, attrs=sig.attrs)
+
+
 #
 # MULTITAPER SPECTROGRAM
 # -----------------------
 #
 
-from concurrent.futures import ProcessPoolExecutor
-import concurrent.futures
-import numpy as np
 import multiprocessing
-from scipy.signal import spectrogram
+from concurrent.futures import ProcessPoolExecutor
+
 
 # Define the channel processing function outside
 def _mt_single_channel(args):
     channel, data, fs, nperseg, noverlap, NW = args
     d = data  # Extract numpy array for better performance
-    ff, tt, sxx = spectrogram(d, fs=fs, nperseg=nperseg, noverlap=noverlap, window=('dpss', NW))
+    ff, tt, sxx = spectrogram(
+        d, fs=fs, nperseg=nperseg, noverlap=noverlap, window=("dpss", NW)
+    )
     return channel, ff, tt, sxx
+
 
 def compute_multitaper_spectrogram(data, seg_length=2, overlap=1, NW=4):
     fs = data.fs
-    nperseg = int(seg_length*fs)
-    noverlap = int(overlap*fs)
-    
+    nperseg = int(seg_length * fs)
+    noverlap = int(overlap * fs)
+
     # Determine reasonable number of workers based on system
     max_workers = min(multiprocessing.cpu_count(), len(data.channel))
-    
+
     # Process channels in parallel
     results = {}
     ff, tt = None, None
-    
+
     # Create argument tuples for each channel
-    args_list = [(ch, data.sel(channel=ch).values, fs, nperseg, noverlap, NW) for ch in data.channel.values]
-    
+    args_list = [
+        (ch, data.sel(channel=ch).values, fs, nperseg, noverlap, NW)
+        for ch in data.channel.values
+    ]
+
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         for channel, freq, time, spec in executor.map(_mt_single_channel, args_list):
             results[channel] = spec
-            
+
             # Store frequency and time axes (same for all channels)
             if ff is None:
                 ff = freq
                 tt = time
-    
+
     # Create organized output
     # Option 1: Dictionary with channel names as keys
-    output = {
-        'frequencies': ff,
-        'times': tt,
-        'spectrograms': results
-    }
+    output = {"frequencies": ff, "times": tt, "spectrograms": results}
 
-# Option 2: Convert to xarray Dataset if xarray is available
+    # Option 2: Convert to xarray Dataset if xarray is available
     try:
         import xarray as xr
-        
+
         # Create a new dataarray with the results
         da = xr.DataArray(
             data=np.array([results[ch] for ch in data.channel.values]),
-            dims=['channel', 'frequency', 'time'],
-            coords={
-                'channel': data.channel.values,
-                'frequency': ff,
-                'time': tt
-            }
+            dims=["channel", "frequency", "time"],
+            coords={"channel": data.channel.values, "frequency": ff, "time": tt},
         )
         return da
     except (ImportError, NameError):
@@ -595,15 +602,19 @@ def compute_multitaper_spectrogram(data, seg_length=2, overlap=1, NW=4):
         return output
 
 
-import acr #TODO: URGENT, fix this!! 
+import acr  # TODO: URGENT, fix this!!
+
 
 def add_datetime_to_spg(spg, subject, rec):
-    rec_start = pd.Timestamp(acr.info_pipeline.subject_info_section(subject, 'rec_times')[rec]['start'])
+    rec_start = pd.Timestamp(
+        acr.info_pipeline.subject_info_section(subject, "rec_times")[rec]["start"]
+    )
     time_array = spg.time.values
-    time_array = pd.to_timedelta(time_array, unit='s')
+    time_array = pd.to_timedelta(time_array, unit="s")
     datetime_array = rec_start + time_array
-    spg = spg.assign_coords(datetime=('time', datetime_array))
-    return spg.swap_dims({'time': 'datetime'})
+    spg = spg.assign_coords(datetime=("time", datetime_array))
+    return spg.swap_dims({"time": "datetime"})
+
 
 def get_mt_spextrogram(data, subject, rec, seg_length=2, overlap=1, NW=4):
     spg = compute_multitaper_spectrogram(data, seg_length, overlap, NW)
